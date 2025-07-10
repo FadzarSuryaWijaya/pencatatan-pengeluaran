@@ -1,5 +1,5 @@
 
-<h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Pribadi</h1>
+<h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Kasir</h1>
 
 ```
 Matkul   : Pemrograman Web 2
@@ -39,9 +39,11 @@ Dosen    : Agung Nugroho, S.Kom., M.KOM
 ```bash
 Pencatatan Pengeluaran Pribadi (Domain Aplikasi)
 
+Domain : [expenditure.ct.ws](https://expenditure.ct.ws)
+
 Username : admin
 
-Password : admin123
+Password : admin1234
 ```
  <h2>Penjelasan  Sistem Pencatatan Pengeluaran Pribadi</h2>
  
