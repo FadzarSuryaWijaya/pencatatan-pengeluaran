@@ -1,8 +1,3 @@
-Berikut ini adalah README versi final yang sudah **disesuaikan dengan isi dari `Laporan Proyek Pemrograman Web.pdf`** namun tetap **mempertahankan semua header asli, nama dosen, domain, username, dan password**, serta menghapus isi yang tidak relevan seperti diminta:
-
----
-
-
 <h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Kasir</h1>
 
 
