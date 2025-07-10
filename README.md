@@ -2,16 +2,16 @@ Berikut ini adalah README versi final yang sudah **disesuaikan dengan isi dari `
 
 ---
 
-```html
+
 <h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Kasir</h1>
-```
+
 
 ```
 Matkul   : Pemrograman Web 2
 Dosen    : Agung Nugroho, S.Kom., M.KOM
 ```
 
-```html
+
 <h3 align="center">-----------KELOMPOK 7----------</h3>
 <table align="center">
    <tr>
@@ -35,7 +35,7 @@ Dosen    : Agung Nugroho, S.Kom., M.KOM
       <td>312310476</td>
    </tr>
 </table>
-```
+
 
 ## **Daftar Isi**
 
@@ -115,7 +115,7 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
 | Nama                    | Tugas                                                               |
 | ----------------------- | ------------------------------------------------------------------- |
 | **Ferly Ardiansyah**    | Membuat mockup desain antarmuka (wireframe & halaman visual)        |
-| **Fadzar Surya Wijaya** | Backend dengan CI4 dan frontend dengan Vue.js, integrasi API        |
+| **Fadzar Surya Wijaya** | Backend dengan CI4 dan frontend         |
 | **Wawan Suwandi**       | Implementasi fitur CRUD pada sistem                                 |
 | **Nurul Aisyah**        | Dokumentasi proyek, flowchart, use case diagram, dan poster promosi |
 
@@ -131,4 +131,3 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
 
 ---
 
-Jika kamu ingin file ini dalam format `.md` siap pakai (Markdown), saya juga bisa bantu buatkan. Mau?
