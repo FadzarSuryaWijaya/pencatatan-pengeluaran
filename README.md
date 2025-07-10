@@ -124,4 +124,3 @@ Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkink
 
 ---
 
-**THANK YOU**
