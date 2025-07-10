@@ -37,27 +37,27 @@ Dosen    : Agung Nugroho, S.Kom., M.KOM
 <h2>Demo Aplikasi, Domain, dan Laporan</h2>
 
 ```bash
-Pencatatan Pengeluaran Pribadi (Domain Aplikasi)
+Pencatatan Pengeluaran kasir (Domain Aplikasi)
 
-Domain : [expenditure.ct.ws](https://expenditure.ct.ws)
+Domain : https://expenditure.ct.ws
 
 Username : admin
 
 Password : admin1234
 ```
- <h2>Penjelasan  Sistem Pencatatan Pengeluaran Pribadi</h2>
+ <h2>Penjelasan  Sistem Pencatatan Pengeluaran kasir</h2>
  
-Aplikasi ini dibuat untuk membantu pengguna mencatat dan memantau pengeluaran mereka secara efisien melalui antarmuka berbasis web. Sistem ini dikembangkan menggunakan CodeIgniter 4 dan MySQL, dengan tujuan utama memberikan solusi sederhana dalam mengelola transaksi harian agar pengguna lebih sadar terhadap keuangan pribadi mereka.
+Aplikasi ini dibuat untuk membantu pengguna mencatat dan memantau pengeluaran mereka secara efisien melalui antarmuka berbasis web. Sistem ini dikembangkan menggunakan CodeIgniter 4 dan MySQL, dengan tujuan utama memberikan solusi sederhana dalam mengelola transaksi harian agar pengguna lebih sadar terhadap keuangan kasir mereka.
 
 Pengguna dapat menambahkan, mengedit, dan menghapus catatan pengeluaran, serta melihat rekapitulasi pengeluaran berdasarkan kategori maupun tanggal. Dengan adanya visualisasi dan laporan, pengguna bisa menganalisis kebiasaan finansial mereka dan merencanakan pengeluaran dengan lebih bijak.
 
-## **Peruntukan Sistem Pencatatan Pengeluaran Pribadi**
+## **Peruntukan Sistem Pencatatan Pengeluaran kasir**
 
 Sistem ini lebih ditujukan untuk:
 
 1. **Petugas Kebersihan atau Facility Management:**
 
-   - Mencatat dan memantau pengeluaran pribadi secara rutin.
+   - Mencatat dan memantau pengeluaran kasir secara rutin.
 
 2. **Mahasiswa/Pelajar:**
 
@@ -115,14 +115,14 @@ Sistem ini lebih ditujukan untuk:
 
 > <h3>Usecase Diagram dari Aplikasi Sistem Checklist Kebersihan Toilet dengan Template Sederhana</h3>
 
-![Pencatatan Pengeluaran Pribadi]![UseCase_PencatatanPengeluaran drawio (1)](https://github.com/user-attachments/assets/9d514813-0873-4b0c-b5d4-bedffde80ae0)
+![Pencatatan Pengeluaran kasir]![UseCase_PencatatanPengeluaran drawio (1)](https://github.com/user-attachments/assets/9d514813-0873-4b0c-b5d4-bedffde80ae0)
 
 
 <h2>Penjelasan</h2>
 
 **Aktor:**
 
-User: Pengguna sistem pencatatan pengeluaran pribadi
+User: Pengguna sistem pencatatan pengeluaran Kasir
 
 **Use Cases Utama:**
 
@@ -145,7 +145,7 @@ User: Pengguna sistem pencatatan pengeluaran pribadi
 
 # <h2>Wireframe Sistem Checklist Kebersihan Toilet<h2>
 
-> <h3>Wireframe dari Website Pencatatan Pengeluaran Pribadi dengan Template Sederhana<h3>
+> <h3>Wireframe dari Website Pencatatan Pengeluaran kasir dengan Template Sederhana<h3>
 
 1. Wireframe Tampilan Login
 
