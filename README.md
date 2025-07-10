@@ -84,15 +84,15 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
 
   * HTML5, CSS3
   * Bootstrap 5
-  * Vue.js
-  * Chart.js
-  * Axios
+  * AdminLTE
+
 
 * **Backend**:
 
   * CodeIgniter 4 (CI4)
   * MySQL
   * REST API (dengan proteksi CSRF, validasi, middleware session)
+  * Composer
 
 * **Mockup Desain (Figma)**:
   [https://www.figma.com/design/F1AN2joNEtUOQtZdPB4597/Untitled](https://www.figma.com/design/F1AN2joNEtUOQtZdPB4597/Untitled)
