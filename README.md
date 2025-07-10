@@ -59,10 +59,9 @@ Password : admin1234
 
 ## Penjelasan Sistem Pencatatan Pengeluaran Kasir
 
-Aplikasi ini dikembangkan sebagai solusi pencatatan pengeluaran pribadi yang sederhana dan mudah digunakan. Sistem ini ditujukan untuk membantu pengguna mengelola keuangan pribadi atau operasional harian melalui antarmuka web yang responsif dan efisien.
+Aplikasi ini merupakan sistem pencatatan pengeluaran kasir yang dirancang khusus untuk membantu kasir atau pemilik usaha dalam mencatat setiap transaksi pengeluaran secara detail dan terstruktur. Sistem ini memudahkan pengguna dalam mencatat berbagai jenis pengeluaran harian, seperti pembelian barang, pembayaran operasional, dan pengeluaran lainnya yang berkaitan dengan aktivitas kasir.
 
-Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat dengan cara memberikan alat bantu pencatatan transaksi dan laporan pengeluaran yang terstruktur dan visual.
-
+Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkinkan pengguna untuk memantau, mengelola, serta membuat laporan pengeluaran secara real-time. Fitur laporan dan grafik yang tersedia juga membantu pengguna dalam menganalisis pola pengeluaran, sehingga pengelolaan keuangan usaha menjadi lebih
 ---
 
 ## Fitur Sistem
@@ -85,6 +84,8 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
   * HTML5, CSS3
   * Bootstrap 5
   * AdminLTE
+  * Chart js
+  * jquery 3.4.1
 
 
 * **Backend**:
@@ -99,9 +100,6 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
 
 * **Demo YouTube**:
   [https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
-
-* **Source Code GitHub**:
-  [https://github.com/FadzarSuryaWijaya/pencatatan-pengeluaran.git](https://github.com/FadzarSuryaWijaya/pencatatan-pengeluaran.git)
 
 ---
 
@@ -119,10 +117,11 @@ Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat denga
 ## Dokumentasi Proyek
 
 * **Video Demo**:
-  [https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
+  [Klik disini!](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
 
 * **Poster Digital**:
-  [https://drive.google.com/drive/folders/1tKqz3ZVBf6g904gfxsNvTBWEkLnhnioX?usp=drive\_link](https://drive.google.com/drive/folders/1tKqz3ZVBf6g904gfxsNvTBWEkLnhnioX?usp=drive_link)
+  ![alt](pic/POSTER%20WEB%202.png)
 
 ---
 
+**THANK YOU**
