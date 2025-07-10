@@ -1,11 +1,17 @@
+Berikut ini adalah README versi final yang sudah **disesuaikan dengan isi dari `Laporan Proyek Pemrograman Web.pdf`** namun tetap **mempertahankan semua header asli, nama dosen, domain, username, dan password**, serta menghapus isi yang tidak relevan seperti diminta:
 
+---
+
+```html
 <h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Kasir</h1>
+```
 
 ```
 Matkul   : Pemrograman Web 2
 Dosen    : Agung Nugroho, S.Kom., M.KOM
 ```
 
+```html
 <h3 align="center">-----------KELOMPOK 7----------</h3>
 <table align="center">
    <tr>
@@ -29,12 +35,20 @@ Dosen    : Agung Nugroho, S.Kom., M.KOM
       <td>312310476</td>
    </tr>
 </table>
+```
 
-  ## **Daftar Isi**
+## **Daftar Isi**
 
+* [Demo Aplikasi, Domain, dan Laporan](#demo-aplikasi-domain-dan-laporan)
+* [Penjelasan Sistem Pencatatan Pengeluaran Kasir](#penjelasan-sistem-pencatatan-pengeluaran-kasir)
+* [Fitur Sistem](#fitur-sistem)
+* [Desain dan Teknologi](#desain-dan-teknologi)
+* [Tugas Anggota Kelompok](#tugas-anggota-kelompok)
+* [Dokumentasi Proyek](#dokumentasi-proyek)
 
- 
-<h2>Demo Aplikasi, Domain, dan Laporan</h2>
+---
+
+## Demo Aplikasi, Domain, dan Laporan
 
 ```bash
 Pencatatan Pengeluaran kasir (Domain Aplikasi)
@@ -45,170 +59,76 @@ Username : admin
 
 Password : admin1234
 ```
- <h2>Penjelasan  Sistem Pencatatan Pengeluaran kasir</h2>
- 
-Aplikasi ini dibuat untuk membantu pengguna mencatat dan memantau pengeluaran mereka secara efisien melalui antarmuka berbasis web. Sistem ini dikembangkan menggunakan CodeIgniter 4 dan MySQL, dengan tujuan utama memberikan solusi sederhana dalam mengelola transaksi harian agar pengguna lebih sadar terhadap keuangan kasir mereka.
 
-Pengguna dapat menambahkan, mengedit, dan menghapus catatan pengeluaran, serta melihat rekapitulasi pengeluaran berdasarkan kategori maupun tanggal. Dengan adanya visualisasi dan laporan, pengguna bisa menganalisis kebiasaan finansial mereka dan merencanakan pengeluaran dengan lebih bijak.
+---
 
-## **Peruntukan Sistem Pencatatan Pengeluaran kasir**
+## Penjelasan Sistem Pencatatan Pengeluaran Kasir
 
-Sistem ini lebih ditujukan untuk:
+Aplikasi ini dikembangkan sebagai solusi pencatatan pengeluaran pribadi yang sederhana dan mudah digunakan. Sistem ini ditujukan untuk membantu pengguna mengelola keuangan pribadi atau operasional harian melalui antarmuka web yang responsif dan efisien.
 
-1. **Petugas Kebersihan atau Facility Management:**
+Tujuan utama dari proyek ini adalah mendukung literasi keuangan masyarakat dengan cara memberikan alat bantu pencatatan transaksi dan laporan pengeluaran yang terstruktur dan visual.
 
-   - Mencatat dan memantau pengeluaran kasir secara rutin.
+---
 
-2. **Mahasiswa/Pelajar:**
+## Fitur Sistem
 
-   - Membantu mengelola uang saku harian/mingguan.
+* **Login & Logout** – Sistem autentikasi untuk pengguna dan admin.
+* **Manajemen Pengguna** – Tambah, ubah, dan hapus akun user/admin.
+* **Manajemen Produk** – Pengelolaan data produk seperti nama, harga, dan satuan.
+* **Kategori & Satuan Produk** – Pengelompokan produk berdasarkan kategori dan satuannya.
+* **Stok Masuk & Keluar** – Catatan barang yang masuk dari supplier dan yang keluar karena penggunaan.
+* **Manajemen Pelanggan & Supplier** – Simpan data pelanggan dan pemasok.
+* **Transaksi Penjualan** – Input transaksi penjualan.
+* **Laporan & Grafik** – Tampilkan laporan transaksi dan stok dalam tabel dan grafik.
 
-3. **Pekerja Kantoran:**
+---
 
-   - Melacak pengeluaran harian untuk kebutuhan transportasi, makan, dll.
+## Desain dan Teknologi
 
-4. **Ibu Rumah Tangga:**
+* **Frontend**:
 
-   - Memonitor pengeluaran rumah tangga seperti belanja, listrik, dan kebutuhan harian.
+  * HTML5, CSS3
+  * Bootstrap 5
+  * Vue.js
+  * Chart.js
+  * Axios
 
-5. **UMKM Skala Kecil:**
-   - Menjadi alat bantu sederhana dalam pencatatan keuangan operasional harian.
+* **Backend**:
 
-## **Fitur-Fitur Website**
+  * CodeIgniter 4 (CI4)
+  * MySQL
+  * REST API (dengan proteksi CSRF, validasi, middleware session)
 
-1. **Manajemen User (Admin & Pengguna):**
+* **Mockup Desain (Figma)**:
+  [https://www.figma.com/design/F1AN2joNEtUOQtZdPB4597/Untitled](https://www.figma.com/design/F1AN2joNEtUOQtZdPB4597/Untitled)
 
-   -  Login, logout, manajemen akun.
+* **Demo YouTube**:
+  [https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
 
-2. **Kategori Pengeluaran:**
+* **Source Code GitHub**:
+  [https://github.com/FadzarSuryaWijaya/pencatatan-pengeluaran.git](https://github.com/FadzarSuryaWijaya/pencatatan-pengeluaran.git)
 
-   - Tambah/ubah/hapus kategori pengeluaran seperti makan, transportasi, hiburan, dll.
+---
 
-3. **Transaksi Pengeluaran:**
+## Tugas Anggota Kelompok
 
-   - Tambah pengeluaran harian dengan keterangan dan jumlah nominal.
-4. **Laporan Pengeluaran:**
+| Nama                    | Tugas                                                               |
+| ----------------------- | ------------------------------------------------------------------- |
+| **Ferly Ardiansyah**    | Membuat mockup desain antarmuka (wireframe & halaman visual)        |
+| **Fadzar Surya Wijaya** | Backend dengan CI4 dan frontend dengan Vue.js, integrasi API        |
+| **Wawan Suwandi**       | Implementasi fitur CRUD pada sistem                                 |
+| **Nurul Aisyah**        | Dokumentasi proyek, flowchart, use case diagram, dan poster promosi |
 
-   - Laporan rekap berdasarkan rentang tanggal dan kategori.
+---
 
-5. **Grafik Visualisasi:**
+## Dokumentasi Proyek
 
-   - Grafik bar/pie untuk membantu menganalisis kebiasaan pengeluaran.
+* **Video Demo**:
+  [https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
 
-6. **Stok Keuangan (opsional):**
-   - Melihat sisa uang berdasarkan pemasukan dan pengeluaran.
+* **Poster Digital**:
+  [https://drive.google.com/drive/folders/1tKqz3ZVBf6g904gfxsNvTBWEkLnhnioX?usp=drive\_link](https://drive.google.com/drive/folders/1tKqz3ZVBf6g904gfxsNvTBWEkLnhnioX?usp=drive_link)
 
+---
 
-## Teknologi yang Digunakan
-
-| Teknologi         | Keterangan                                                                 |
-|-------------------|-----------------------------------------------------------------------------|
-| **CodeIgniter 4** | Framework PHP ringan dan cepat untuk membangun aplikasi web berbasis MVC   |
-| **MySQL**         | Sistem manajemen basis data relasional untuk menyimpan data pengguna       |
-| **Bootstrap 5**   | Framework CSS untuk desain antarmuka yang responsif dan modern             |
-| **Chart.js**      | Library JavaScript untuk menampilkan grafik laporan pengeluaran            |
-| **Visual Studio Code** | Editor kode sumber dengan berbagai ekstensi pendukung pengembangan web |
-| **XAMPP / Laragon** | Web server lokal untuk menjalankan aplikasi dan database secara offline  |
-
-
-<h2>Usecase Diagram</h2>
-
-> <h3>Usecase Diagram dari Aplikasi Sistem Checklist Kebersihan Toilet dengan Template Sederhana</h3>
-
-![Pencatatan Pengeluaran kasir]![UseCase_PencatatanPengeluaran drawio (1)](https://github.com/user-attachments/assets/9d514813-0873-4b0c-b5d4-bedffde80ae0)
-
-
-<h2>Penjelasan</h2>
-
-**Aktor:**
-
-User: Pengguna sistem pencatatan pengeluaran Kasir
-
-**Use Cases Utama:**
-
-1. Login - Proses autentikasi pengguna
-2. Akses Dashboard - Mengakses halaman utama sistem
-3. Tambah Data Pengeluaran - Mencatat pengeluaran baru
-4. Lihat Laporan - Melihat data pengeluaran yang telah dicatat
-
-**Use Cases Pendukung:**
-
-1. Pilih Produk - Memilih produk yang dibeli
-2. Input Jumlah - Memasukkan jumlah pembelian
-3. Input Tanggal - Memasukkan tanggal transaksi
-4. Input Supplier - Memasukkan informasi supplier
-5. Simpan Data - Menyimpan data pengeluaran
-6. Kelola Stok Masuk - Mengelola stok barang masuk
-7. Update Jumlah Stok - Memperbarui jumlah stok
-8. Menyimpan Data Stok - Menyimpan data stok yang diperbarui
-
-
-# <h2>Wireframe Sistem Checklist Kebersihan Toilet<h2>
-
-> <h3>Wireframe dari Website Pencatatan Pengeluaran kasir dengan Template Sederhana<h3>
-
-1. Wireframe Tampilan Login
-
-
-
-2. Wireframe Tampilan Sign Up
-
-
-
-3. Wireframe Tampilan Menu
-
-
-
-4. Wireframe Tampilan Checklist Toilet
-
-
-
-5. Wireframe Tampilan Tambah Data Checklist Toilet
-   
-
-
-6. Wireframe Tampilan Ubah Data Checklist Toilet
-   
-
-7. Wireframe Tampilan Data Toilet
-
-
-
-8. Wireframe Tampilan Tambah Data Toilet
-   
-
-
-# <h2>Design Sistem Checklist Kebersihan Toilet<h2>
-
-> <h3>Design dari Website Sistem Checklist Kebersihan Toilet dengan Template Sederhana<h3>
-
-1. Design Fitur Tampilan Login
-
-
-
-2. Design Fitur Tampilan Sign Up
-
-
-
-3. Design Fitur Tampilan Menu
-   
-
-
-4. Design Fitur Tampilan Checklist Toilet
-   
-
-
-5. Design Fitur Tampilan Tambah Data Checklist Toilet
-   
-
-
-6. Design Fitur Tampilan Ubah Data Checklist Toilet
-
-
-
-7. Design Fitur Tampilan Data Toilet
-   
-
-
-8. Design Fitur Tampilan Tambah Data Toilet
-
+Jika kamu ingin file ini dalam format `.md` siap pakai (Markdown), saya juga bisa bantu buatkan. Mau?
