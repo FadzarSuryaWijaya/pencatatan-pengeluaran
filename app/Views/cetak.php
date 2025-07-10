@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Cetak</title>
 </head>
+
 <body>
 	<div style="width: 500px; margin: auto;">
 		<br>
 		<center>
-			<?php echo $toko['nama']; ?><br>
-			<?php echo $toko['alamat']; ?><br><br>
+			<?php echo $toko['nama'] ?? 'Nama Toko Tidak Tersedia'; ?><br> 
+			<?php echo $toko['alamat'] ?? 'Alamat tidak tersedia'; ?><br><br>
 			<table width="100%">
 				<tr>
 					<td><?php echo $nota ?></td>
@@ -74,11 +76,11 @@
 			</table>
 			<br>
 			Terima Kasih <br>
-			<?$tokoData = (object) $session->get('pelanggan'); ?>
 		</center>
 	</div>
 	<script>
 		window.print()
 	</script>
 </body>
+
 </html>

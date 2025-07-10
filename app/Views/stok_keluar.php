@@ -85,9 +85,10 @@
         <select name="barcode" id="barcode" class="form-control select2" required></select>
       </div>
       <div class="form-group">
-        <label>Jumlah</label>
-        <input type="number" class="form-control" placeholder="Jumlah" name="jumlah" required>
-      </div>
+            <label>Jumlah</label>
+            <input type="number" class="form-control" placeholder="Jumlah" name="jumlah" min="1" required>
+            <div class="invalid-feedback">Jumlah harus lebih dari 0</div>
+        </div>
       <div class="form-group">
         <label>Keterangan</label>
         <select class="form-control" placeholder="Keterangan" name="keterangan" required>

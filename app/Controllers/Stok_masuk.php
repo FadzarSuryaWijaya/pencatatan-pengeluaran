@@ -74,25 +74,28 @@ class Stok_masuk extends Controller
      */
     public function read(): ResponseInterface
     {
-        $data = []; // Inisialisasi array data
+        $data = [];
         
-        // Panggil metode readStokMasuk() dari model
         $stokMasukList = $this->stokMasukModel->readStokMasuk();
 
         if (!empty($stokMasukList)) {
             foreach ($stokMasukList as $stok_masuk) {
-                // Pastikan kolom 'tanggal' ada dan formatnya benar untuk DateTime
-                // Asumsi $stok_masuk adalah array asosiatif (sesuai returnType model)
-                $tanggal = new \DateTime($stok_masuk['tanggal']); 
-                $data[] = [
-                    'tanggal'      => $tanggal->format('d-m-Y H:i:s'),
-                    'barcode'      => esc($stok_masuk['barcode']),     // Gunakan esc() untuk escaping HTML
-                    'nama_produk'  => esc($stok_masuk['nama_produk']), // Gunakan esc() untuk escaping HTML
-                    'jumlah'       => esc($stok_masuk['jumlah']),
-                    'keterangan'   => esc($stok_masuk['keterangan']), // Gunakan esc() untuk escaping HTML
-                    'supplier'      => esc($stokMasuk['supplier_nama'] ?? 'Umum'),
-                    'action'       => '',
+                try {
+                    $tanggal = new \DateTime($stok_masuk['tanggal']);
+                    $formattedTanggal = $tanggal->format('d-m-Y H:i:s');
+                } catch (\Exception $e) {
+                    $formattedTanggal = 'Invalid Date';
+                    log_message('error', 'Date parsing error: ' . $e->getMessage());
+                }
 
+                $data[] = [
+                    'tanggal'      => $formattedTanggal,
+                    'barcode'      => esc($stok_masuk['produk_barcode'] ?? 'N/A'), // PERBAIKAN: gunakan produk_barcode
+                    'nama_produk'  => esc($stok_masuk['nama_produk'] ?? 'Produk Tidak Ditemukan'),
+                    'jumlah'       => esc($stok_masuk['jumlah'] ?? '0'),
+                    'keterangan'   => esc($stok_masuk['keterangan'] ?? 'Tanpa Keterangan'),
+                    'supplier'     => esc($stok_masuk['supplier_nama'] ?? 'Umum'),
+                    'action'       => '',
                 ];
             }
         }
@@ -111,44 +114,71 @@ class Stok_masuk extends Controller
      */
     public function add(): ResponseInterface
     {
-        $produkId     = $this->request->getPost('barcode'); // Asumsi 'barcode' dari form adalah ID produk
+        // Debug: Log input data
+        $inputData = [
+            'barcode' => $this->request->getPost('barcode'),
+            'jumlah' => $this->request->getPost('jumlah'),
+            'keterangan' => $this->request->getPost('keterangan'),
+            'supplier' => $this->request->getPost('supplier'),
+            'tanggal' => $this->request->getPost('tanggal')
+        ];
+        log_message('debug', 'Input data: ' . print_r($inputData, true));
+
+        $produkId     = $this->request->getPost('barcode'); // ID produk yang dipilih
         $jumlah       = (int)$this->request->getPost('jumlah');
         $keterangan   = $this->request->getPost('keterangan');
-        $supplierId   = $this->request->getPost('supplier'); // Ambil ID supplier
-        $tanggalInput = $this->request->getPost('tanggal'); // Ambil tanggal dari input form
+        $supplierId   = $this->request->getPost('supplier');
+        $tanggalInput = $this->request->getPost('tanggal');
+
+        // Validasi input
+        if (empty($produkId) || $jumlah <= 0) {
+            return $this->response->setJSON([
+                'status' => 'gagal', 
+                'message' => 'Data tidak valid. Pastikan produk dipilih dan jumlah > 0.'
+            ]);
+        }
 
         // 1. Ambil stok saat ini dari tabel produk
         $currentStokData = $this->stokMasukModel->getStokProduk($produkId);
-        $currentStok = $currentStokData['stok'] ?? 0; // Default ke 0 jika produk tidak ditemukan atau stok kosong
+        $currentStok = (int)($currentStokData['stok'] ?? 0);
 
-        // 2. Hitung stok baru (penambahan)
+        // 2. Hitung stok baru
         $newStok = $currentStok + $jumlah;
 
         // 3. Perbarui stok di tabel produk
-        $updateStokSuccess = $this->stokMasukModel->addStokProduk($produkId, $newStok); // Nama fungsi di model adalah addStokProduk
+        $updateStokSuccess = $this->stokMasukModel->addStokProduk($produkId, $newStok);
 
         if ($updateStokSuccess) {
-            // 4. Jika update stok produk sukses, simpan data stok masuk
-            // Pastikan format tanggal sesuai atau gunakan current datetime jika tanggal input kosong
-            $tanggal = new \DateTime($tanggalInput ?: 'now'); // Menggunakan 'now' jika tanggal input kosong
+            // 4. Simpan data stok masuk
+            $tanggal = !empty($tanggalInput) ? new \DateTime($tanggalInput) : new \DateTime();
 
+            // PERBAIKAN: Gunakan nama field yang sesuai dengan allowedFields
             $dataStokMasuk = [
                 'tanggal'    => $tanggal->format('Y-m-d H:i:s'),
-                'produk_id'  => $produkId,   // Menggunakan produk_id sebagai Foreign Key ke tabel produk
+                'barcode'    => $produkId,    // FK ke tabel produk
                 'jumlah'     => $jumlah,
                 'keterangan' => $keterangan,
-                'supplier_id' => $supplierId // Simpan ID supplier
+                'supplier'   => $supplierId,  // FK ke tabel supplier
+                // 'user_id'    => session()->get('user_id') ?? null // Jika ada session user
             ];
+
+            log_message('debug', 'Data to insert: ' . print_r($dataStokMasuk, true));
 
             if ($this->stokMasukModel->createStokMasuk($dataStokMasuk)) {
                 return $this->response->setJSON(['status' => 'sukses']);
             } else {
-                // Jika gagal mencatat stok masuk, pertimbangkan untuk melakukan rollback stok produk
-                // (Logika rollback bisa lebih kompleks, untuk saat ini hanya respons gagal)
-                return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal mencatat transaksi stok masuk.']);
+                // Rollback stok jika gagal insert stok masuk
+                $this->stokMasukModel->addStokProduk($produkId, $currentStok);
+                return $this->response->setJSON([
+                    'status' => 'gagal', 
+                    'message' => 'Gagal mencatat transaksi stok masuk.'
+                ]);
             }
         } else {
-            return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal memperbarui stok produk.']);
+            return $this->response->setJSON([
+                'status' => 'gagal', 
+                'message' => 'Gagal memperbarui stok produk.'
+            ]);
         }
     }
 
@@ -224,14 +254,17 @@ public function get_barcode(): ResponseInterface
     public function stok_hari(): ResponseInterface
     {
         // Menggunakan helper date() untuk mendapatkan tanggal hari ini dalam format yang sesuai
-        $now = date('d m Y'); // Contoh: '28 05 2025'
-        
+        $now = date('Y-m-d');        
+        log_message('debug', 'Calling stokMasukHari for date: ' . $now);
         // Panggil metode stokMasukHari() dari model
+        
         $totalStok = $this->stokMasukModel->stokMasukHari($now);
+        log_message('debug', 'Result from model for stokMasukHari: ' . print_r($totalStok, true));
 
         // Mengembalikan total (atau 0 jika null) dalam format JSON
         // Pastikan model mengembalikan array dengan kunci 'total'
         $response = $totalStok['total'] ?? 0; // Menggunakan null coalescing operator untuk default 0
+        log_message('debug', 'JSON response for stok_hari: ' . json_encode($response));
 
         return $this->response->setJSON($response);
     }

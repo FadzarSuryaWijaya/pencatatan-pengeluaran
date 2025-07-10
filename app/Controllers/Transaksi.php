@@ -21,6 +21,7 @@ class Transaksi extends Controller
 
     protected Transaksi_model $transaksiModel; // Deklarasikan properti untuk Transaksi_model
     protected Produk_model $produkModel;      // Deklarasikan properti untuk Produk_model
+    protected $db;
 
     /**
      * Constructor untuk menginisialisasi controller.
@@ -30,6 +31,8 @@ class Transaksi extends Controller
     {
         $this->transaksiModel = new Transaksi_model(); // Inisialisasi Transaksi_model
         $this->produkModel    = new Produk_model();    // Inisialisasi Produk_model
+        $this->db = \Config\Database::connect();
+
     }
 
     /**
@@ -75,7 +78,7 @@ class Transaksi extends Controller
     public function read(): ResponseInterface
     {
         $data = []; // Inisialisasi array data
-        
+
         // Panggil metode readTransaksi() dari model
         $transaksiList = $this->transaksiModel->readTransaksi();
 
@@ -88,7 +91,7 @@ class Transaksi extends Controller
                 // Dapatkan nama produk dan harga untuk ditampilkan dalam tabel
                 // Asumsi Transaksi_model memiliki metode getProdukTransaksiDetail yang mengambil array ID dan Qty string
                 $produkDetails = $this->transaksiModel->getProdukTransaksiDetail($barcodeIds, $qtysString);
-                
+
                 $namaProdukHtml = '<table>';
                 if (!empty($produkDetails)) {
                     foreach ($produkDetails as $detail) {
@@ -96,10 +99,10 @@ class Transaksi extends Controller
                     }
                 }
                 $namaProdukHtml .= '</table>';
-                
+
                 // Tanggal parsing yang lebih robust
                 try {
-                    $tanggal = new \DateTime($transaksi['tanggal']); 
+                    $tanggal = new \DateTime($transaksi['tanggal']);
                     $formattedTanggal = $tanggal->format('d-m-Y H:i:s');
                 } catch (\Exception $e) {
                     // Log the error or set a default value if date parsing fails
@@ -154,10 +157,10 @@ class Transaksi extends Controller
                 if ($productId) {
                     // Mengurangi stok produk menggunakan metode dari Transaksi_model
                     $this->transaksiModel->removeStokProduk($productId, $stokToBeRemoved);
-                    
+
                     // Menambahkan jumlah terjual produk menggunakan metode dari Transaksi_model
                     $this->transaksiModel->addTerjualProduk($productId, $terjualToAdd);
-                    
+
                     // Tambahkan ID produk ke array barcode untuk disimpan di transaksi
                     $barcodeIds[] = $productId;
                 }
@@ -213,13 +216,18 @@ class Transaksi extends Controller
      */
     public function cetak(int $id): string
     {
-            $session = \Config\Services::session(); // Tambahkan baris ini
-            $tokoData = $session->get('toko'); // Ambil data toko dari session
-
+        $session = \Config\Services::session(); // Tambahkan baris ini
+        $tokoData = $session->get('toko'); // Ambil data toko dari session
+        
+        if (!$tokoData) {
+            $db = \Config\Database::connect();
+            $tokoData = $db->table('toko')->get()->getRowArray();
+            $session->set('toko', $tokoData);
+        }
         // Mendapatkan detail transaksi dari model
         // Menggunakan getDetailTransaksi yang melakukan join untuk nama kasir dan pelanggan
         $transaksi = $this->transaksiModel->getDetailTransaksi($id);
-        
+
         if (empty($transaksi)) {
             // Handle jika transaksi tidak ditemukan
             return view('errors/html/error_404', ['message' => 'Transaksi tidak ditemukan.']);
@@ -239,7 +247,7 @@ class Transaksi extends Controller
         }
 
         // Mendapatkan nama produk dan detail harga dari Transaksi_model
-        $dataProdukRaw = $this->transaksiModel->getProdukNamesAndPrices($barcodeIds); 
+        $dataProdukRaw = $this->transaksiModel->getProdukNamesAndPrices($barcodeIds);
 
         $dataProduk = [];
         $produkMap = [];
@@ -250,12 +258,12 @@ class Transaksi extends Controller
         foreach ($barcodeIds as $key => $productId) {
             $currentQty = (int)($qtys[$key] ?? 0);
             $productInfo = $produkMap[$productId] ?? ['nama_produk' => 'Produk Tidak Ditemukan', 'harga' => 0];
-            
+
             $dataProduk[] = [
                 'nama_produk' => esc($productInfo['nama_produk']),
-                'total_qty'   => $currentQty, 
-                'harga_satuan'=> (float)($productInfo['harga'] ?? 0), 
-                'total_harga' => (float)($productInfo['harga'] ?? 0) * $currentQty 
+                'total_qty'   => $currentQty,
+                'harga_satuan' => (float)($productInfo['harga'] ?? 0),
+                'total_harga' => (float)($productInfo['harga'] ?? 0) * $currentQty
             ];
         }
 
@@ -268,7 +276,7 @@ class Transaksi extends Controller
             'bayar'     => esc(number_format($transaksi['jumlah_uang'], 0, ',', '.')), // Sudah diformat
             'kembalian' => esc(number_format((float)$transaksi['jumlah_uang'] - (float)$transaksi['total_bayar'], 0, ',', '.')), // Sudah diformat
             'kasir'     => esc($transaksi['kasir_nama'] ?? 'N/A'), //Menggunakan 'kasir_nama' dari join
-            'toko'      => $tokoData // TERUSKAN DATA TOKO KE VIEW
+            'toko'      => $tokoData, // TERUSKAN DATA TOKO KE VIEW
         ];
 
         // Memuat view 'cetak' dengan data
@@ -292,7 +300,7 @@ class Transaksi extends Controller
                 $currentYear  = date('Y');
                 // Format tanggal agar sesuai dengan ekspektasi model: 'DD MM YYYY'
                 $dateString   = sprintf('%02d %02d %04d', (int)$day, (int)$currentMonth, (int)$currentYear);
-                
+
                 // Panggil metode penjualanBulan() dari model
                 $qtyResult = $this->transaksiModel->penjualanBulan($dateString);
 
@@ -318,7 +326,7 @@ class Transaksi extends Controller
     public function transaksi_hari(): ResponseInterface
     {
         $now = date('d m Y'); // Contoh: '28 05 2025'
-        
+
         // Panggil metode transaksiHari() dari model
         $total = $this->transaksiModel->transaksiHari($now);
 
@@ -333,41 +341,49 @@ class Transaksi extends Controller
      */
     public function transaksi_terakhir(): ResponseInterface
     {
-        $now = date('d m Y');
-        $total = []; // Inisialisasi array untuk menampung hasil explode
+        $now = date('Y-m-d'); // Format YYYY-MM-DD untuk model
 
         // Panggil metode transaksiTerakhir() dari model
-        // Asumsi transaksiTerakhir mengembalikan sebuah baris array dengan kunci 'qty'
-        $resultRow = $this->transaksiModel->transaksiTerakhir($now);
+        // Ini akan mengembalikan array of products atau array kosong
+        $productsInLastTransaction = $this->transaksiModel->transaksiTerakhir($now);
 
-        if (!empty($resultRow) && isset($resultRow['qty'])) {
-            $total = explode(',', $resultRow['qty']);
+        // Jika Anda ingin menampilkan "X Produk" atau "X pcs", Anda bisa menghitungnya di sini.
+        // Jika Anda ingin menampilkan daftar produk, teruskan array ke JS.
+
+        // Untuk "Produk Transaksi Terakhir" pada dashboard, kita bisa menampilkan:
+        // 1. Jumlah item unik (count($productsInLastTransaction))
+        // 2. Total kuantitas semua produk (sum of 'qty' in $productsInLastTransaction)
+        // 3. Nama produk pertama (jika hanya 1)
+        // Paling mudah adalah total kuantitas semua produk yang terjual di transaksi terakhir.
+        $totalQtyLastTransaction = 0;
+        foreach ($productsInLastTransaction as $item) {
+            $totalQtyLastTransaction += $item['qty'];
         }
 
-        return $this->response->setJSON($total);
+        // Return the total quantity, not the raw array.
+        return $this->response->setJSON(['total' => $totalQtyLastTransaction]);
     }
-    
+
     public function get_barcode(): ResponseInterface
-{
-    // Ambil parameter 'barcode' dari POST request
-    // Gunakan null coalescing operator (?? '') untuk memastikan selalu string
-    $searchTerm = $this->request->getPost('barcode') ?? ''; 
-    
-    // Panggil metode model
-    $searchResults = $this->produkModel->getBarcode($searchTerm); 
+    {
+        // Ambil parameter 'barcode' dari POST request
+        // Gunakan null coalescing operator (?? '') untuk memastikan selalu string
+        $searchTerm = $this->request->getPost('barcode') ?? '';
 
-    $data = [];
-    if (!empty($searchResults)) {
-        foreach ($searchResults as $row) {
-            $data[] = [
-                'id'   => esc($row['id']),
-                'text' => esc($row['barcode']) . ' - ' . esc($row['nama_produk']) // Pastikan 'nama_produk' juga diambil di model
-            ];
+        // Panggil metode model
+        $searchResults = $this->produkModel->getBarcode($searchTerm);
+
+        $data = [];
+        if (!empty($searchResults)) {
+            foreach ($searchResults as $row) {
+                $data[] = [
+                    'id'   => esc($row['id']),
+                    'text' => esc($row['barcode']) . ' - ' . esc($row['nama_produk']) // Pastikan 'nama_produk' juga diambil di model
+                ];
+            }
         }
-    }
 
-    // Penting: Select2 versi terbaru mengharapkan hasil dalam kunci 'results'
+        // Penting: Select2 versi terbaru mengharapkan hasil dalam kunci 'results'
         return $this->response->setJSON($data);
-}
-
+    }
 }

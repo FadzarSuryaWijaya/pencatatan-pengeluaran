@@ -22,10 +22,10 @@ class Transaksi_model extends Model
     // PASTIkan ini mencakup semua kolom yang akan Anda gunakan dalam form
     // Asumsi kolom-kolom untuk transaksi:
     protected $allowedFields = ['tanggal', 'barcode', 'qty', 'total_bayar', 'jumlah_uang', 'diskon', 'pelanggan', 'kasir', 'nota'];
-                               // 'barcode' di sini kemungkinan adalah produk_id
-                               // 'pelanggan' di sini kemungkinan adalah pelanggan_id
-                               // 'kasir' di sini kemungkinan adalah kasir_id (FK ke pengguna.id)
-                               // Sesuaikan dengan kolom aktual di tabel Anda
+    // 'barcode' di sini kemungkinan adalah produk_id
+    // 'pelanggan' di sini kemungkinan adalah pelanggan_id
+    // 'kasir' di sini kemungkinan adalah kasir_id (FK ke pengguna.id)
+    // Sesuaikan dengan kolom aktual di tabel Anda
 
     // Timestamp (atur true jika tabel memiliki kolom created_at, updated_at, deleted_at)
     protected $useTimestamps = false;
@@ -46,14 +46,14 @@ class Transaksi_model extends Model
      * @param int $stok Nilai stok baru setelah pengurangan.
      * @return bool True jika berhasil, false jika gagal.
      */
-    public function removeStokProduk($id, $stok) // Ubah nama fungsi agar lebih spesifik
+    public function removeStokProduk($id, $amountToReduce)
     {
-        // Fungsi ini beroperasi pada tabel 'produk', bukan 'transaksi'.
-        // Menggunakan $this->db->table('produk') untuk mengakses tabel produk secara langsung.
+        // Gunakan decrement() untuk mengurangi nilai pada kolom 'stok'
+        // Ini secara otomatis akan melakukan: UPDATE produk SET stok = stok - [amountToReduce] WHERE id = [id]
+        // Pastikan kolom 'stok' di tabel 'produk' bertipe numerik (INT, DECIMAL, dll.)
         return $this->db->table('produk')
-                        ->where('id', $id)
-                        ->set('stok', $stok)
-                        ->update();
+            ->where('id', $id)
+            ->decrement('stok', $amountToReduce);
     }
 
     /**
@@ -63,14 +63,13 @@ class Transaksi_model extends Model
      * @param int $jumlah Jumlah terjual yang akan ditambahkan.
      * @return bool True jika berhasil, false jika gagal.
      */
-    public function addTerjualProduk($id, $jumlah) // Ubah nama fungsi agar lebih spesifik
+    public function addTerjualProduk($id, $jumlah)
     {
-        // Fungsi ini beroperasi pada tabel 'produk', bukan 'transaksi'.
-        // Menggunakan $this->db->table('produk') untuk mengakses tabel produk secara langsung.
+        // Gunakan increment() untuk menambahkan nilai pada kolom 'terjual'
+        // Ini secara otomatis akan melakukan: UPDATE produk SET terjual = terjual + [jumlah] WHERE id = [id]
         return $this->db->table('produk')
-                        ->where('id', $id)
-                        ->set('terjual', $jumlah)
-                        ->update();
+            ->where('id', $id)
+            ->increment('terjual', $jumlah);
     }
 
     /**
@@ -95,11 +94,11 @@ class Transaksi_model extends Model
         // Menggunakan builder() untuk mengakses Query Builder saat melakukan join
         // Asumsi 'transaksi.pelanggan' adalah foreign key ke 'pelanggan.id'
         return $this->builder()
-                    ->select('transaksi.id, transaksi.tanggal, transaksi.nota, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, transaksi.diskon, pelanggan.nama as pelanggan_nama,  pengguna.nama as kasir_nama')
-                    ->join('pelanggan', 'transaksi.pelanggan = pelanggan.id', 'left') // 'left outer' di CI3 menjadi 'left' di CI4
-                    ->join('pengguna', 'transaksi.kasir = pengguna.id', 'left')
-                    ->get()
-                    ->getResultArray(); // Mengambil semua hasil sebagai array of arrays
+            ->select('transaksi.id, transaksi.tanggal, transaksi.nota, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, transaksi.diskon, pelanggan.nama as pelanggan_nama,  pengguna.nama as kasir_nama')
+            ->join('pelanggan', 'transaksi.pelanggan = pelanggan.id', 'left') // 'left outer' di CI3 menjadi 'left' di CI4
+            ->join('pengguna', 'transaksi.kasir = pengguna.id', 'left')
+            ->get()
+            ->getResultArray(); // Mengambil semua hasil sebagai array of arrays
     }
 
     /**
@@ -121,12 +120,13 @@ class Transaksi_model extends Model
      * yang kurang ideal untuk praktik MVC. Sebaiknya model mengembalikan data,
      * dan view yang bertanggung jawab untuk HTML. Saya akan mengembalikan data array
      * yang lebih bersih.
+     * Mengambil nama produk dan kuantitas untuk transaksi tertentu.
      *
      * @param array $barcode_ids Array berisi ID produk (yang dinamai 'barcode' di CI3).
      * @param string $qty_string String kuantitas yang dipisahkan koma (misal: "2,1,5").
      * @return array Array berisi nama produk dan kuantitasnya.
      */
-    public function getProdukTransaksiDetail(array $barcode_ids, string $qty_string) // Ubah nama fungsi & params
+    public function getProdukTransaksiDetail(array $barcode_ids, string $qty_string)
     {
         $total_qty = explode(',', $qty_string);
         $data = [];
@@ -136,25 +136,46 @@ class Transaksi_model extends Model
         }
 
         // Ambil semua nama produk sekaligus untuk menghindari N+1 query
+        // Check if 'harga' column exists, if not just get nama_produk
         $produk_data = $this->db->table('produk')
-                                ->select('id, nama_produk')
-                                ->whereIn('id', $barcode_ids)
-                                ->get()
-                                ->getResultArray();
+            ->select('id, nama_produk')
+            ->whereIn('id', $barcode_ids)
+            ->get()
+            ->getResultArray();
 
+        // Create a map of product ID to product info
         $produk_map = [];
         foreach ($produk_data as $produk) {
-            $produk_map[$produk['id']] = $produk['nama_produk'];
+            $produk_map[$produk['id']] = [
+                'nama_produk' => $produk['nama_produk'],
+                'harga' => 0 // Default to 0 since harga column doesn't exist
+            ];
         }
 
         foreach ($barcode_ids as $key => $product_id) {
-            $nama_produk = $produk_map[$product_id] ?? 'Produk Tidak Ditemukan';
-            $qty = $total_qty[$key] ?? 0;
+            $qty = isset($total_qty[$key]) ? (int)$total_qty[$key] : 0;
+
+            if (isset($produk_map[$product_id])) {
+                // Product found in database
+                $product_info = $produk_map[$product_id];
+                $nama_produk = $product_info['nama_produk'];
+                $harga_satuan = (float)$product_info['harga'];
+                $total_harga = $harga_satuan * $qty;
+            } else {
+                // Product not found in database
+                $nama_produk = 'Produk Tidak Ditemukan';
+                $harga_satuan = 0;
+                $total_harga = 0;
+            }
+
             $data[] = [
                 'nama_produk' => $nama_produk,
-                'qty' => $qty
+                'qty' => $qty, // Changed from 'total_qty' to 'qty' to match controller usage
+                'harga_satuan' => $harga_satuan,
+                'total_harga' => $total_harga
             ];
         }
+
         return $data;
     }
 
@@ -191,7 +212,7 @@ class Transaksi_model extends Model
     {
         // Menggunakan prepared statement (?) untuk mencegah SQL Injection
         return $this->db->query("SELECT COUNT(*) AS total FROM transaksi WHERE DATE_FORMAT(tanggal, '%d %m %Y') = ?", [$hari])
-                        ->getRowArray(); // Mengambil satu baris hasil agregasi sebagai array
+            ->getRowArray(); // Mengambil satu baris hasil agregasi sebagai array
     }
 
     /**
@@ -200,18 +221,50 @@ class Transaksi_model extends Model
      * @param string $hari Tanggal dalam format 'DD MMYYYY'.
      * @return array|null Mengembalikan data qty transaksi terakhir, null jika tidak ada.
      */
-    public function transaksiTerakhir($hari)
+    public function transaksiTerakhir(string $date): array
     {
-        // Menggunakan prepared statement (?) untuk mencegah SQL Injection
-        // Assuming you want the 'qty' string from the latest transaction on that day
-        $result = $this->db->query("SELECT transaksi.qty FROM transaksi WHERE DATE_FORMAT(tanggal, '%d %m %Y') = ? ORDER BY tanggal DESC LIMIT 1", [$hari])
-                        ->getRowArray();
-        
-        // If result is found, explode and sum the quantities
-        if ($result && isset($result['qty'])) {
-            return array_sum(array_map('intval', explode(',', $result['qty'])));
+        // Mengambil transaksi terakhir untuk tanggal yang diberikan
+        $result = $this->db->table('transaksi')
+            ->select('barcode, qty')
+            ->where('DATE(tanggal)', $date) // Perhatikan format tanggal yang cocok dengan 'YYYY-MM-DD'
+            ->orderBy('tanggal', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray(); // Mengembalikan satu baris sebagai array
+
+        $productsInLastTransaction = [];
+
+        if ($result && isset($result['barcode']) && isset($result['qty'])) {
+            $barcodeIds = explode(',', $result['barcode']);
+            $qtys = array_map('intval', explode(',', $result['qty']));
+
+            if (empty($barcodeIds)) {
+                return []; // No products in this transaction
+            }
+
+            // Ambil detail produk (nama) dari tabel 'produk'
+            $productDetails = $this->db->table('produk')
+                ->select('id, nama_produk')
+                ->whereIn('id', $barcodeIds)
+                ->get()
+                ->getResultArray();
+
+            $productMap = [];
+            foreach ($productDetails as $product) {
+                $productMap[$product['id']] = $product['nama_produk'];
+            }
+
+            foreach ($barcodeIds as $index => $productId) {
+                $qty = $qtys[$index] ?? 0;
+                $productName = $productMap[$productId] ?? 'Produk Tidak Ditemukan';
+                $productsInLastTransaction[] = [
+                    'nama_produk' => $productName,
+                    'qty' => $qty
+                ];
+            }
         }
-        return 0; // Return 0 if no transactions found or qty is empty
+
+        return $productsInLastTransaction;
     }
 
 
@@ -226,11 +279,11 @@ class Transaksi_model extends Model
         // Menggunakan builder() untuk mengakses Query Builder saat melakukan join
         // Asumsi 'transaksi.kasir' adalah foreign key ke 'pengguna.id'
         return $this->builder()
-                    ->select('transaksi.nota, transaksi.tanggal, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, pengguna.nama as kasir_nama')
-                    ->join('pengguna', 'transaksi.kasir = pengguna.id')
-                    ->where('transaksi.id', $id)
-                    ->get()
-                    ->getRowArray(); // Mengambil satu baris sebagai array asosiatif
+            ->select('transaksi.nota, transaksi.tanggal, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, pengguna.nama as kasir_nama')
+            ->join('pengguna', 'transaksi.kasir = pengguna.id')
+            ->where('transaksi.id', $id)
+            ->get()
+            ->getRowArray(); // Mengambil satu baris sebagai array asosiatif
     }
 
     /**
@@ -250,10 +303,10 @@ class Transaksi_model extends Model
 
         // Ambil semua nama produk dan harga sekaligus untuk menghindari N+1 query
         return $this->db->table('produk')
-                        ->select('id, nama_produk, harga')
-                        ->whereIn('id', $barcode_ids)
-                        ->get()
-                        ->getResultArray();
+            ->select('id, nama_produk, harga')
+            ->whereIn('id', $barcode_ids)
+            ->get()
+            ->getResultArray();
     }
 
     /**
@@ -266,16 +319,16 @@ class Transaksi_model extends Model
     public function getTransaksiByDateRange(?string $startDate, ?string $endDate): array
     {
         $builder = $this->builder()
-                        ->select('transaksi.id, transaksi.tanggal, transaksi.nota, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, transaksi.diskon, pelanggan.nama as pelanggan_nama, pengguna.nama as kasir_nama')
-                        ->join('pelanggan', 'transaksi.pelanggan = pelanggan.id', 'left')
-                        ->join('pengguna', 'transaksi.kasir = pengguna.id', 'left');
+            ->select('transaksi.id, transaksi.tanggal, transaksi.nota, transaksi.barcode, transaksi.qty, transaksi.total_bayar, transaksi.jumlah_uang, transaksi.diskon, pelanggan.nama as pelanggan_nama, pengguna.nama as kasir_nama')
+            ->join('pelanggan', 'transaksi.pelanggan = pelanggan.id', 'left')
+            ->join('pengguna', 'transaksi.kasir = pengguna.id', 'left');
 
         // HANYA tambahkan kondisi WHERE jika tanggal disediakan
         if (!empty($startDate) && !empty($endDate)) {
             $start = (new \DateTime($startDate))->format('Y-m-d 00:00:00');
             $end = (new \DateTime($endDate))->format('Y-m-d 23:59:59');
             $builder->where('transaksi.tanggal >=', $start)
-                    ->where('transaksi.tanggal <=', $end);
+                ->where('transaksi.tanggal <=', $end);
         }
 
         return $builder

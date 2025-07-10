@@ -177,31 +177,31 @@ class Produk extends Controller
      *
      * @return ResponseInterface
      */
-// app/Controllers/Stok_masuk.php
+    // app/Controllers/Stok_masuk.php
 
-public function get_barcode(): ResponseInterface
-{
-    // Ambil parameter 'barcode' dari POST request
-    // Gunakan null coalescing operator (?? '') untuk memastikan selalu string
-    $searchTerm = $this->request->getPost('barcode') ?? ''; 
-    
-    // Panggil metode model
-    $searchResults = $this->produkModel->getBarcode($searchTerm); 
+    public function get_barcode(): ResponseInterface
+    {
+        // Ambil parameter 'barcode' dari POST request
+        // Gunakan null coalescing operator (?? '') untuk memastikan selalu string
+        $searchTerm = $this->request->getPost('barcode') ?? '';
 
-    $data = [];
-    if (!empty($searchResults)) {
-        foreach ($searchResults as $row) {
-            $data[] = [
-                'id'   => esc($row['id']),
-                'text' => esc($row['barcode']) . ' - ' . esc($row['nama_produk']) // Pastikan 'nama_produk' juga diambil di model
-            ];
+        // Panggil metode model
+        $searchResults = $this->produkModel->getBarcode($searchTerm);
+
+        $data = [];
+        if (!empty($searchResults)) {
+            foreach ($searchResults as $row) {
+                $data[] = [
+                    'id'   => esc($row['id']),
+                    'text' => esc($row['barcode']) . ' - ' . esc($row['nama_produk']) // Pastikan 'nama_produk' juga diambil di model
+                ];
+            }
         }
-    }
 
-    // Penting: Select2 versi terbaru (setidaknya yang saya tahu) mengharapkan hasil dalam kunci 'results'
-    // Jadi, respon JSON harus {"results": [...]}
-    return $this->response->setJSON(['results' => $data]); 
-}
+        // Penting: Select2 versi terbaru (setidaknya yang saya tahu) mengharapkan hasil dalam kunci 'results'
+        // Jadi, respon JSON harus {"results": [...]}
+        return $this->response->setJSON(['results' => $data]);
+    }
 
 
     /**
@@ -245,7 +245,23 @@ public function get_barcode(): ResponseInterface
      */
     public function produk_terlaris(): ResponseInterface
     {
-        $produkTerlarisList = $this->produkModel->produkTerlaris(); // Memanggil metode produkTerlaris() dari model
+        // Ambil parameter periode dari request (GET atau POST)
+        $periode = $this->request->getGet('periode') ?? $this->request->getPost('periode') ?? '1month';
+        $limit = (int)($this->request->getGet('limit') ?? $this->request->getPost('limit') ?? 5);
+
+        // Validasi periode
+        $allowedPeriods = ['today', '1month', '1year', 'all'];
+        if (!in_array($periode, $allowedPeriods)) {
+            $periode = '1month';
+        }
+
+        // Validasi limit
+        if ($limit < 1 || $limit > 20) {
+            $limit = 5;
+        }
+
+        // Panggil metode model dengan parameter
+        $produkTerlarisList = $this->produkModel->produkTerlaris($periode, $limit);
 
         $label = [];
         $data  = [];
@@ -253,16 +269,55 @@ public function get_barcode(): ResponseInterface
         if (!empty($produkTerlarisList)) {
             foreach ($produkTerlarisList as $item) {
                 $label[] = esc($item['nama_produk']);
-                $data[]  = esc($item['terjual']);
+                $data[]  = (int)$item['total_terjual'];
             }
         }
 
         $result = [
             'label' => $label,
             'data'  => $data,
+            'periode' => $periode,
+            'total_produk' => count($produkTerlarisList)
         ];
 
         return $this->response->setJSON($result);
+    }
+
+    /**
+     * Method khusus untuk mendapatkan statistik produk terlaris dengan berbagai periode.
+     *
+     * @return ResponseInterface
+     */
+    public function statistik_produk_terlaris(): ResponseInterface
+    {
+        $periode = $this->request->getGet('periode') ?? '1month';
+        $limit = (int)($this->request->getGet('limit') ?? 10);
+
+        $allowedPeriods = ['today', '1month', '1year', 'all'];
+        if (!in_array($periode, $allowedPeriods)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Periode tidak valid. Gunakan: today, 1month, 1year, atau all'
+            ]);
+        }
+
+        $data = $this->produkModel->produkTerlaris($periode, $limit);
+
+        // Tambahkan informasi periode dalam response
+        $periodeName = [
+            'today' => 'Hari Ini',
+            '1month' => '1 Bulan Terakhir',
+            '1year' => '1 Tahun Terakhir',
+            'all' => 'Semua Waktu'
+        ];
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'periode' => $periode,
+            'periode_nama' => $periodeName[$periode],
+            'total_produk' => count($data),
+            'data' => $data
+        ]);
     }
 
     /**

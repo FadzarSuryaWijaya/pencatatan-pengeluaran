@@ -53,7 +53,7 @@ class Dashboard extends Controller
             return view('login');
         }
     }
-     /**
+    /**
      * Mengambil data penjualan bulanan untuk grafik.
      * Akan menerima array hari dari frontend dan mengembalikan total penjualan untuk setiap hari.
      *
@@ -86,12 +86,12 @@ class Dashboard extends Controller
 
             // Call the model method for each specific day
             $dailyTotal = $this->transaksiModel->penjualanBulan($dateFormatted);
-            
+
             // The model returns an array of sums for each row's 'qty' string.
             // We need the *sum of these sums* to get the total for the day.
             $monthlySalesData[] = array_sum($dailyTotal);
         }
-        
+
         // If your getDays() in JS includes '0', this array will also have a value for index 0.
         // Charts usually start from index 1 for Day 1. Ensure your chart can handle this or adjust `getDays()`.
         return $this->response->setJSON($monthlySalesData);

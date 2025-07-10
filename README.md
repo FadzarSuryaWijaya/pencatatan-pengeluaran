@@ -1,68 +1,212 @@
-# CodeIgniter 4 Application Starter
 
-## What is CodeIgniter?
+<h1 align="center" font-weight="bold"> UAS Sistem Pencatatan Pengeluaran Pribadi</h1>
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+```
+Matkul   : Pemrograman Web 2
+Dosen    : Agung Nugroho, S.Kom., M.KOM
+```
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+<h3 align="center">-----------KELOMPOK 7----------</h3>
+<table align="center">
+   <tr>
+      <th>Nama</th>
+      <th>NIM</th>
+   </tr>
+   <tr>
+      <td>Ferly Ardiansyah</td>
+      <td>312310448</td>
+   </tr>
+      <tr>
+      <td>Fadzar Surya Wijaya</td>
+      <td>312310451</td>
+   </tr>
+      <tr>
+      <td>Wawan Suwandi</td>
+      <td>312310457</td>
+    </tr>
+          <tr>
+      <td>Nurul Aisyah</td>
+      <td>312310476</td>
+   </tr>
+</table>
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+  ## **Daftar Isi**
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
 
-## Installation & updates
+ 
+<h2>Demo Aplikasi, Domain, dan Laporan</h2>
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+```bash
+Pencatatan Pengeluaran Pribadi (Domain Aplikasi)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+Username : admin
 
-## Setup
+Password : admin123
+```
+ <h2>Penjelasan  Sistem Pencatatan Pengeluaran Pribadi</h2>
+ 
+Aplikasi ini dibuat untuk membantu pengguna mencatat dan memantau pengeluaran mereka secara efisien melalui antarmuka berbasis web. Sistem ini dikembangkan menggunakan CodeIgniter 4 dan MySQL, dengan tujuan utama memberikan solusi sederhana dalam mengelola transaksi harian agar pengguna lebih sadar terhadap keuangan pribadi mereka.
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+Pengguna dapat menambahkan, mengedit, dan menghapus catatan pengeluaran, serta melihat rekapitulasi pengeluaran berdasarkan kategori maupun tanggal. Dengan adanya visualisasi dan laporan, pengguna bisa menganalisis kebiasaan finansial mereka dan merencanakan pengeluaran dengan lebih bijak.
 
-## Important Change with index.php
+## **Peruntukan Sistem Pencatatan Pengeluaran Pribadi**
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+Sistem ini lebih ditujukan untuk:
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+1. **Petugas Kebersihan atau Facility Management:**
 
-**Please** read the user guide for a better explanation of how CI4 works!
+   - Mencatat dan memantau pengeluaran pribadi secara rutin.
 
-## Repository Management
+2. **Mahasiswa/Pelajar:**
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+   - Membantu mengelola uang saku harian/mingguan.
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+3. **Pekerja Kantoran:**
 
-## Server Requirements
+   - Melacak pengeluaran harian untuk kebutuhan transportasi, makan, dll.
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+4. **Ibu Rumah Tangga:**
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+   - Memonitor pengeluaran rumah tangga seperti belanja, listrik, dan kebutuhan harian.
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+5. **UMKM Skala Kecil:**
+   - Menjadi alat bantu sederhana dalam pencatatan keuangan operasional harian.
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+## **Fitur-Fitur Website**
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+1. **Manajemen User (Admin & Pengguna):**
+
+   -  Login, logout, manajemen akun.
+
+2. **Kategori Pengeluaran:**
+
+   - Tambah/ubah/hapus kategori pengeluaran seperti makan, transportasi, hiburan, dll.
+
+3. **Transaksi Pengeluaran:**
+
+   - Tambah pengeluaran harian dengan keterangan dan jumlah nominal.
+4. **Laporan Pengeluaran:**
+
+   - Laporan rekap berdasarkan rentang tanggal dan kategori.
+
+5. **Grafik Visualisasi:**
+
+   - Grafik bar/pie untuk membantu menganalisis kebiasaan pengeluaran.
+
+6. **Stok Keuangan (opsional):**
+   - Melihat sisa uang berdasarkan pemasukan dan pengeluaran.
+
+
+## Teknologi yang Digunakan
+
+| Teknologi         | Keterangan                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| **CodeIgniter 4** | Framework PHP ringan dan cepat untuk membangun aplikasi web berbasis MVC   |
+| **MySQL**         | Sistem manajemen basis data relasional untuk menyimpan data pengguna       |
+| **Bootstrap 5**   | Framework CSS untuk desain antarmuka yang responsif dan modern             |
+| **Chart.js**      | Library JavaScript untuk menampilkan grafik laporan pengeluaran            |
+| **Visual Studio Code** | Editor kode sumber dengan berbagai ekstensi pendukung pengembangan web |
+| **XAMPP / Laragon** | Web server lokal untuk menjalankan aplikasi dan database secara offline  |
+
+
+<h2>Usecase Diagram</h2>
+
+> <h3>Usecase Diagram dari Aplikasi Sistem Checklist Kebersihan Toilet dengan Template Sederhana</h3>
+
+![Pencatatan Pengeluaran Pribadi]![UseCase_PencatatanPengeluaran drawio (1)](https://github.com/user-attachments/assets/9d514813-0873-4b0c-b5d4-bedffde80ae0)
+
+
+<h2>Penjelasan</h2>
+
+**Aktor:**
+
+User: Pengguna sistem pencatatan pengeluaran pribadi
+
+**Use Cases Utama:**
+
+1. Login - Proses autentikasi pengguna
+2. Akses Dashboard - Mengakses halaman utama sistem
+3. Tambah Data Pengeluaran - Mencatat pengeluaran baru
+4. Lihat Laporan - Melihat data pengeluaran yang telah dicatat
+
+**Use Cases Pendukung:**
+
+1. Pilih Produk - Memilih produk yang dibeli
+2. Input Jumlah - Memasukkan jumlah pembelian
+3. Input Tanggal - Memasukkan tanggal transaksi
+4. Input Supplier - Memasukkan informasi supplier
+5. Simpan Data - Menyimpan data pengeluaran
+6. Kelola Stok Masuk - Mengelola stok barang masuk
+7. Update Jumlah Stok - Memperbarui jumlah stok
+8. Menyimpan Data Stok - Menyimpan data stok yang diperbarui
+
+
+# <h2>Wireframe Sistem Checklist Kebersihan Toilet<h2>
+
+> <h3>Wireframe dari Website Pencatatan Pengeluaran Pribadi dengan Template Sederhana<h3>
+
+1. Wireframe Tampilan Login
+
+
+
+2. Wireframe Tampilan Sign Up
+
+
+
+3. Wireframe Tampilan Menu
+
+
+
+4. Wireframe Tampilan Checklist Toilet
+
+
+
+5. Wireframe Tampilan Tambah Data Checklist Toilet
+   
+
+
+6. Wireframe Tampilan Ubah Data Checklist Toilet
+   
+
+7. Wireframe Tampilan Data Toilet
+
+
+
+8. Wireframe Tampilan Tambah Data Toilet
+   
+
+
+# <h2>Design Sistem Checklist Kebersihan Toilet<h2>
+
+> <h3>Design dari Website Sistem Checklist Kebersihan Toilet dengan Template Sederhana<h3>
+
+1. Design Fitur Tampilan Login
+
+
+
+2. Design Fitur Tampilan Sign Up
+
+
+
+3. Design Fitur Tampilan Menu
+   
+
+
+4. Design Fitur Tampilan Checklist Toilet
+   
+
+
+5. Design Fitur Tampilan Tambah Data Checklist Toilet
+   
+
+
+6. Design Fitur Tampilan Ubah Data Checklist Toilet
+
+
+
+7. Design Fitur Tampilan Data Toilet
+   
+
+
+8. Design Fitur Tampilan Tambah Data Toilet
+

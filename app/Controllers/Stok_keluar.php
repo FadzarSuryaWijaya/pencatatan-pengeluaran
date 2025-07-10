@@ -18,9 +18,11 @@ class Stok_keluar extends Controller
      * @var array
      */
     protected $helpers = ['session', 'url']; // Memuat helper 'session' untuk fungsi session() dan 'url' untuk redirect()
+    protected $db;
 
     protected Stok_keluar_model $stokKeluarModel; // Deklarasikan properti untuk Stok_keluar_model
     protected Produk_model $produkModel;         // Deklarasikan properti untuk Produk_model
+    
 
     /**
      * Constructor untuk menginisialisasi controller.
@@ -30,6 +32,7 @@ class Stok_keluar extends Controller
     {
         $this->stokKeluarModel = new Stok_keluar_model(); // Inisialisasi Stok_keluar_model
         $this->produkModel     = new Produk_model();      // Inisialisasi Produk_model
+        $this->db = \Config\Database::connect();
     }
 
     /**
@@ -75,7 +78,7 @@ class Stok_keluar extends Controller
     public function read(): ResponseInterface
     {
         $data = []; // Inisialisasi array data
-        
+
         // Panggil metode readStokKeluar() dari model
         $stokKeluarList = $this->stokKeluarModel->readStokKeluar();
 
@@ -83,10 +86,10 @@ class Stok_keluar extends Controller
             foreach ($stokKeluarList as $stok_keluar) {
                 // Pastikan kolom 'tanggal' ada dan formatnya benar untuk DateTime
                 // Asumsi $stok_keluar adalah array asosiatif (sesuai returnType model)
-                $tanggal = new \DateTime($stok_keluar['tanggal']); 
+                $tanggal = new \DateTime($stok_keluar['tanggal']);
                 $data[] = [
                     'tanggal'      => $tanggal->format('d-m-Y H:i:s'),
-                    'barcode'      => esc($stok_keluar['barcode']),     // Gunakan esc() untuk escaping HTML
+                    'barcode'      => esc($stok_keluar['produk_barcode']),     // Gunakan esc() untuk escaping HTML
                     'nama_produk'  => esc($stok_keluar['nama_produk']), // Gunakan esc() untuk escaping HTML
                     'jumlah'       => esc($stok_keluar['jumlah']),
                     'keterangan'   => esc($stok_keluar['keterangan']), // Gunakan esc() untuk escaping HTML
@@ -107,45 +110,91 @@ class Stok_keluar extends Controller
      * @return ResponseInterface
      */
     public function add(): ResponseInterface
-    {
-        $produkId   = $this->request->getPost('barcode'); // Asumsi 'barcode' dari form adalah ID produk
-        $jumlah     = (int)$this->request->getPost('jumlah');
-        $keterangan = $this->request->getPost('keterangan');
-        $tanggalInput = $this->request->getPost('tanggal'); // Ambil tanggal dari input form
+{
+    $inputData = [
+        'barcode' => $this->request->getPost('barcode'),
+        'jumlah' => (int)$this->request->getPost('jumlah'),
+        'keterangan' => $this->request->getPost('keterangan'),
+        'tanggal' => $this->request->getPost('tanggal')
+    ];
 
-        // 1. Ambil stok saat ini dari tabel produk
-        $currentStokData = $this->stokKeluarModel->getStokProduk($produkId);
-        $currentStok = $currentStokData['stok'] ?? 0; // Default ke 0 jika produk tidak ditemukan atau stok kosong
+    // Basic validation
+    $validation = \Config\Services::validation();
+    $validation->setRules([
+        'barcode' => 'required',
+        'jumlah' => 'required|numeric|greater_than[0]',
+        'keterangan' => 'required',
+        'tanggal' => 'required'
+    ]);
 
-        // 2. Hitung stok baru (tidak boleh kurang dari 0)
-        $newStok = max($currentStok - $jumlah, 0);
-
-        // 3. Perbarui stok di tabel produk
-        $updateStokSuccess = $this->stokKeluarModel->addStokProduk($produkId, $newStok); // Nama fungsi di model adalah addStokProduk
-
-        if ($updateStokSuccess) {
-            // 4. Jika update stok produk sukses, simpan data stok keluar
-            // Pastikan format tanggal sesuai atau gunakan current datetime jika tanggal input kosong
-            $tanggal = new \DateTime($tanggalInput ?: 'now'); // Menggunakan 'now' jika tanggal input kosong
-
-            $dataStokKeluar = [
-                'tanggal'    => $tanggal->format('Y-m-d H:i:s'),
-                'produk_id'  => $produkId, // Menggunakan produk_id sebagai Foreign Key ke tabel produk
-                'jumlah'     => $jumlah,
-                'keterangan' => $keterangan
-            ];
-
-            if ($this->stokKeluarModel->createStokKeluar($dataStokKeluar)) {
-                return $this->response->setJSON(['status' => 'sukses']);
-            } else {
-                // Jika gagal mencatat stok keluar, pertimbangkan untuk melakukan rollback stok produk
-                // (Logika rollback bisa lebih kompleks, untuk saat ini hanya respons gagal)
-                return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal mencatat transaksi stok keluar.']);
-            }
-        } else {
-            return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal memperbarui stok produk.']);
-        }
+    if (!$validation->withRequest($this->request)->run()) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Semua field harus diisi dan jumlah harus lebih dari 0',
+            'errors' => $validation->getErrors() // Include validation errors
+        ]);
     }
+
+    // Check product existence
+    $produk = $this->produkModel->find($inputData['barcode']);
+    if (!$produk) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Produk tidak ditemukan',
+            'product_id' => $inputData['barcode']
+        ]);
+    }
+
+    // Stock validation
+    if ($produk['stok'] < $inputData['jumlah']) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Stok tidak mencukupi',
+            'current_stock' => $produk['stok'],
+            'requested_amount' => $inputData['jumlah']
+        ]);
+    }
+
+    // Begin transaction
+    $this->db->transBegin();
+
+    try {
+        // Update product stock
+        $newStok = $produk['stok'] - $inputData['jumlah'];
+        $this->produkModel->update($inputData['barcode'], ['stok' => $newStok]);
+
+        // Record stock out
+        $dataStokKeluar = [
+            'tanggal' => (new \DateTime($inputData['tanggal']))->format('Y-m-d H:i:s'),
+            'barcode' => $inputData['barcode'],
+            'jumlah' => $inputData['jumlah'],
+            'keterangan' => $inputData['keterangan'],
+            'user_id' => session()->get('id')
+        ];
+
+        $this->stokKeluarModel->insert($dataStokKeluar);
+
+        // Commit transaction if all successful
+        $this->db->transCommit();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Stok keluar berhasil dicatat',
+            'new_stock' => $newStok
+        ]);
+
+    } catch (\Exception $e) {
+        // Rollback transaction on error
+        $this->db->transRollback();
+        
+        log_message('error', 'Stok keluar error: ' . $e->getMessage());
+        
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+        ]);
+    }
+}
 
     /**
      * Mengambil detail produk berdasarkan barcode.
@@ -156,12 +205,12 @@ class Stok_keluar extends Controller
     public function get_barcode(): ResponseInterface
     {
         $searchTerm = $this->request->getPost('barcode');
-        
+
         // Menggunakan Produk_model untuk mencari produk berdasarkan barcode
         // Metode getBarcode() di Produk_model mengembalikan array of arrays {id, barcode}
-        $searchResults = $this->produkModel->getBarcode($searchTerm); 
+        $searchResults = $this->produkModel->getBarcode($searchTerm);
 
-            $data = [];
+        $data = [];
         if (!empty($searchResults)) {
             foreach ($searchResults as $row) {
                 $data[] = [
@@ -170,7 +219,7 @@ class Stok_keluar extends Controller
                 ];
             }
         }
-        
+
         return $this->response->setJSON($data);
     }
 }

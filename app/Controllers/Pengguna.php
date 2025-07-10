@@ -66,13 +66,15 @@ class Pengguna extends Controller
         $data = []; // Inisialisasi array data
 
         // Panggil metode readPenggunaByRole() dari model
-        $penggunaList = $this->penggunaModel->readPenggunaByRole();
+        $penggunaList = $this->penggunaModel->readPenggunaWithTokoByRole();
 
         if (!empty($penggunaList)) {
             foreach ($penggunaList as $pengguna) {
                 $data[] = [
                     'username' => esc($pengguna['username']), // Gunakan esc() untuk escaping HTML
                     'nama'     => esc($pengguna['nama']),     // Gunakan esc() untuk escaping HTML
+                    'nama_toko'   => esc($pengguna['nama_toko'] ?? 'N/A'), // Use null coalescing to handle users without a shop
+                    'alamat_toko' => esc($pengguna['alamat_toko'] ?? 'N/A'), // Use null coalescing to handle users without a shop
                     'action'   => '<button class="btn btn-sm btn-success" onclick="edit(' . esc($pengguna['id']) . ')">Edit</button> <button class="btn btn-sm btn-danger" onclick="remove(' . esc($pengguna['id']) . ')">Delete</button>'
                 ];
             }
@@ -85,26 +87,26 @@ class Pengguna extends Controller
         return $this->response->setJSON($response);
     }
 
-    /**
-     * Menambahkan data pengguna baru.
-     *
-     * @return ResponseInterface
-     */
-    public function add(): ResponseInterface
-    {
-        $data = [
-            'username' => $this->request->getPost('username'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT), // Password di-hash
-            'nama'     => $this->request->getPost('nama'),
-            'role'     => '2' // Role default untuk pengguna baru
-        ];
+    // /**
+    //  * Menambahkan data pengguna baru.
+    //  *
+    //  * @return ResponseInterface
+    //  */
+    // public function add(): ResponseInterface
+    // {
+    //     $data = [
+    //         'username' => $this->request->getPost('username'),
+    //         'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT), // Password di-hash
+    //         'nama'     => $this->request->getPost('nama'),
+    //         'role'     => '0' // Role default untuk pengguna baru
+    //     ];
 
-        if ($this->penggunaModel->createPengguna($data)) {
-            return $this->response->setJSON(['status' => 'sukses']);
-        }
+    //     if ($this->penggunaModel->createPengguna($data)) {
+    //         return $this->response->setJSON(['status' => 'sukses']);
+    //     }
 
-        return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal menambahkan pengguna.']);
-    }
+    //     return $this->response->setJSON(['status' => 'gagal', 'message' => 'Gagal menambahkan pengguna.']);
+    // }
 
     /**
      * Menghapus data pengguna.
@@ -156,9 +158,11 @@ class Pengguna extends Controller
     public function get_pengguna(): ResponseInterface
     {
         $id = $this->request->getPost('id');
-        $pengguna = $this->penggunaModel->getPenggunaById($id); // Memanggil metode getPenggunaById() dari model
+        $pengguna = $this->penggunaModel->getPenggunaWithTokoById($id); // Memanggil metode getPenggunaById() dari model
 
         if (!empty($pengguna)) {
+            $pengguna['nama_toko'] = $pengguna['nama_toko'] ?? '';
+            $pengguna['alamat_toko'] = $pengguna['alamat_toko'] ?? '';
             return $this->response->setJSON($pengguna);
         }
 

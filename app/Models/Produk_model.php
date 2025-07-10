@@ -98,6 +98,9 @@ class Produk_model extends Model
 	 */
 	public function getProdukById($id) // Ubah nama fungsi agar lebih spesifik
 	{
+		if (!is_numeric($id) || $id <= 0) {
+			return null;
+		}
 		// Menggunakan builder() untuk mengakses Query Builder saat melakukan join
 		return $this->builder()
 			->select('produk.id, produk.barcode, produk.nama_produk, produk.harga, produk.stok, kategori_produk.id as kategori_id, kategori_produk.kategori, satuan_produk.id as satuan_id, satuan_produk.satuan')
@@ -114,24 +117,24 @@ class Produk_model extends Model
 	 * @param string $search String pencarian barcode.
 	 * @return array Array of arrays/objects yang cocok dengan pencarian barcode.
 	 */
-	
+
 	// app/Models/Produk_model.php
-public function getBarcode(string $searchTerm = '')
-{
-    $builder = $this->builder(); // Ini mengembalikan objek Query Builder
-    $builder->select('id, barcode, nama_produk');
+	public function getBarcode(string $searchTerm = '')
+	{
+		$builder = $this->builder(); // Ini mengembalikan objek Query Builder
+		$builder->select('id, barcode, nama_produk');
 
-    if (!empty($searchTerm)) {
-        $builder->groupStart()
-                ->like('barcode', $searchTerm)
-                ->orLike('nama_produk', $searchTerm)
-                ->groupEnd();
-    }
+		if (!empty($searchTerm)) {
+			$builder->groupStart()
+				->like('barcode', $searchTerm)
+				->orLike('nama_produk', $searchTerm)
+				->groupEnd();
+		}
 
-    // Ubah findAll() menjadi get()->getResultArray() atau get()->getResult()
-    return $builder->get()->getResultArray(); // Mengambil hasil dalam bentuk array asosiatif
-    // Atau jika Anda ingin objek: return $builder->get()->getResult();
-}
+		// Ubah findAll() menjadi get()->getResultArray() atau get()->getResult()
+		return $builder->get()->getResultArray(); // Mengambil hasil dalam bentuk array asosiatif
+		// Atau jika Anda ingin objek: return $builder->get()->getResult();
+	}
 
 	/**
 	 * Mengambil nama produk dan stok berdasarkan ID.
@@ -141,6 +144,9 @@ public function getBarcode(string $searchTerm = '')
 	 */
 	public function getNamaProdukStok($id) // Ubah nama fungsi agar lebih spesifik
 	{
+		if (!is_numeric($id) || $id <= 0) {
+			return null;
+		}
 		// Menggunakan select() dan find() untuk mendapatkan kolom tertentu dari satu baris
 		return $this->select('nama_produk, stok')->find($id);
 	}
@@ -158,18 +164,129 @@ public function getBarcode(string $searchTerm = '')
 	}
 
 	/**
-	 * Mengambil 5 produk terlaris berdasarkan kolom 'terjual'.
-	 * Catatan: Kolom 'terjual' diasumsikan ada dan berisi nilai numerik (meskipun disimpan sebagai string).
+	 * Mengambil produk terlaris dengan metode yang lebih efisien.
+	 * Alternatif jika query di atas terlalu kompleks.
 	 *
-	 * @return array Array of objects/arrays yang berisi nama_produk dan terjual.
+	 * @param string $periode Periode: 'today', '1month', '1year', 'all'
+	 * @param int $limit Jumlah produk yang ditampilkan
+	 * @return array
 	 */
-	public function produkTerlaris()
+	public function produkTerlaris($periode = '1month', $limit = 5)
 	{
-		// Menggunakan kueri SQL mentah karena ada CONVERT dan ORDER BY yang kompleks
-		return $this->db->query('SELECT produk.nama_produk, produk.terjual FROM `produk` 
-                                ORDER BY CONVERT(terjual, DECIMAL) DESC LIMIT 5')
-			->getResultArray(); // Mengambil hasil sebagai array of arrays
+		// Ambil semua transaksi dalam periode tertentu
+		$builder = $this->db->table('transaksi');
+
+		if ($periode !== 'all') {
+			$dateRange = $this->getDateRange($periode);
+			$builder->where('tanggal >=', $dateRange['start'])
+				->where('tanggal <=', $dateRange['end']);
+		}
+
+		$transaksi = $builder->select('barcode, qty')->get()->getResultArray();
+
+		// Proses data untuk menghitung total terjual per produk
+		$produkTerjual = [];
+
+		foreach ($transaksi as $trans) {
+			$barcodes = explode(',', $trans['barcode']);
+			$qtys = explode(',', $trans['qty']);
+
+			foreach ($barcodes as $index => $produkId) {
+				$produkId = trim($produkId);
+				$qty = isset($qtys[$index]) ? (int)trim($qtys[$index]) : 0;
+
+				if ($qty > 0) {
+					if (!isset($produkTerjual[$produkId])) {
+						$produkTerjual[$produkId] = 0;
+					}
+					$produkTerjual[$produkId] += $qty;
+				}
+			}
+		}
+
+		// Urutkan berdasarkan total terjual
+		arsort($produkTerjual);
+
+		// Ambil top products
+		$topProdukIds = array_slice(array_keys($produkTerjual), 0, $limit);
+
+		if (empty($topProdukIds)) {
+			return [];
+		}
+
+		// Ambil nama produk
+		$produkData = $this->db->table('produk')
+			->select('id, nama_produk')
+			->whereIn('id', $topProdukIds)
+			->get()
+			->getResultArray();
+
+		// Gabungkan dengan data terjual
+		$result = [];
+		foreach ($produkData as $produk) {
+			$result[] = [
+				'nama_produk' => $produk['nama_produk'],
+				'total_terjual' => $produkTerjual[$produk['id']]
+			];
+		}
+
+		// Urutkan kembali berdasarkan total_terjual
+		usort($result, function ($a, $b) {
+			return $b['total_terjual'] - $a['total_terjual'];
+		});
+
+		return $result;
 	}
+	/**
+	 * Mendapatkan kondisi tanggal untuk query SQL.
+	 *
+	 * @param string $periode
+	 * @return string
+	 */
+	private function getDateCondition($periode)
+	{
+		switch ($periode) {
+			case 'today':
+				return "AND DATE(t.tanggal) = CURDATE()";
+			case '1month':
+				return "AND t.tanggal >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+			case '1year':
+				return "AND t.tanggal >= DATE_SUB(NOW(), INTERVAL 1 YEAR)";
+			case 'all':
+			default:
+				return "";
+		}
+	}
+
+	/**
+	 * Mendapatkan rentang tanggal berdasarkan periode.
+	 *
+	 * @param string $periode
+	 * @return array
+	 */
+	private function getDateRange($periode)
+	{
+		$now = new \DateTime();
+		$end = $now->format('Y-m-d 23:59:59');
+
+		switch ($periode) {
+			case 'today':
+				$start = $now->format('Y-m-d 00:00:00');
+				break;
+			case '1month':
+				$start = $now->modify('-1 month')->format('Y-m-d 00:00:00');
+				break;
+			case '1year':
+				$start = $now->modify('-1 year')->format('Y-m-d 00:00:00');
+				break;
+			default:
+				$start = '1970-01-01 00:00:00';
+				break;
+		}
+
+		return ['start' => $start, 'end' => $end];
+	}
+
 
 	/**
 	 * Mengambil 50 data produk dengan stok terbanyak.
@@ -179,9 +296,20 @@ public function getBarcode(string $searchTerm = '')
 	 */
 	public function dataStok()
 	{
-		// Menggunakan kueri SQL mentah karena ada CONVERT dan ORDER BY yang kompleks
-		return $this->db->query('SELECT produk.nama_produk, produk.stok FROM `produk` 
-                                ORDER BY CONVERT(stok, DECIMAL) DESC LIMIT 50')
-			->getResultArray(); // Mengambil hasil sebagai array of arrays
+		return $this->builder()
+			->select('nama_produk, stok')
+			->orderBy('stok', 'DESC')
+			->limit(50)
+			->get()
+			->getResultArray();
+	}
+	
+	public function getProdukByBarcode(string $barcodeString): ?array
+	{
+		return $this->builder()
+			->select('id, barcode, nama_produk, harga, stok, kategori, satuan') // Ambil semua kolom yang relevan
+			->where('barcode', $barcodeString)
+			->get()
+			->getRowArray();
 	}
 }

@@ -83,7 +83,7 @@ class Laporan_stok_masuk extends Controller
 
                 $data[] = [
                     'tanggal'       => $formattedTanggal,
-                    'barcode'       => esc($stokMasuk['barcode'] ?? 'N/A'),
+                    'barcode'       => esc($stokMasuk['produk_barcode'] ?? 'N/A'),
                     'nama_produk'   => esc($stokMasuk['nama_produk'] ?? 'Produk Tidak Ditemukan'),
                     'jumlah'        => number_format((float)($stokMasuk['jumlah'] ?? 0), 0, ',', '.'),
                     'keterangan'    => esc($stokMasuk['keterangan'] ?? 'Tanpa Keterangan'),
@@ -121,7 +121,7 @@ class Laporan_stok_masuk extends Controller
 
                     $data[] = [
                         'tanggal'       => $formattedTanggal,
-                        'barcode'       => esc($stokMasuk['barcode'] ?? 'N/A'),
+                        'barcode'       => esc($stokMasuk['produk_barcode'] ?? 'N/A'),
                         'nama_produk'   => esc($stokMasuk['nama_produk'] ?? 'Produk Tidak Ditemukan'),
                         'jumlah'        => number_format((float)($stokMasuk['jumlah'] ?? 0), 0, ',', '.'),
                         'keterangan'    => esc($stokMasuk['keterangan'] ?? 'Tanpa Keterangan'),

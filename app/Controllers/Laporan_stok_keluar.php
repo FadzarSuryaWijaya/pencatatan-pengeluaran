@@ -19,13 +19,13 @@ class Laporan_stok_keluar extends Controller
      */
     protected $helpers = ['session', 'url']; // Memuat helper 'session' untuk fungsi session() dan 'url' untuk redirect()
     protected Stok_keluar_model $stokKeluarModel;
-        public function __construct()
-        {
-            $this->stokKeluarModel = new Stok_keluar_model();
-        }
+    public function __construct()
+    {
+        $this->stokKeluarModel = new Stok_keluar_model();
+    }
 
 
-        
+
     /**
      * Metode initController digunakan untuk inisialisasi awal controller.
      * Ini adalah tempat yang tepat untuk melakukan pengecekan autentikasi/login.
@@ -45,6 +45,7 @@ class Laporan_stok_keluar extends Controller
         // Periksa status login pengguna. Jika tidak 'login', arahkan kembali ke halaman utama.
         if ($session->get('status') !== 'login') {
             return redirect()->to('/'); // Ubah ini ke URL halaman login atau halaman utama Anda jika diperlukan
+            exit();
         }
     }
 
@@ -59,7 +60,7 @@ class Laporan_stok_keluar extends Controller
         // Di CodeIgniter 4, Anda cukup menggunakan fungsi helper view() untuk memuat view.
         return view('laporan_stok_keluar');
     }
-        /**
+    /**
      * Membaca data stok keluar untuk ditampilkan di tabel (misalnya DataTables).
      * Mengembalikan data dalam format JSON.
      *
@@ -68,40 +69,40 @@ class Laporan_stok_keluar extends Controller
     public function read(): ResponseInterface
     {
         $data = []; // Inisialisasi array data
-        
+
         // Panggil metode readStokKeluar() dari model
-        $stokKeluarList = $this->stokKeluarModel->readStokKeluar();
+        $stokKeluarList = $this->stokKeluarModel->readLaporanStokKeluar();
 
         if (!empty($stokKeluarList)) {
             foreach ($stokKeluarList as $stok_keluar) {
                 // Pastikan kolom 'tanggal' ada dan formatnya benar untuk DateTime
                 // Asumsi $stok_keluar adalah array asosiatif (sesuai returnType model)
-                $tanggal = new \DateTime($stok_keluar['tanggal']); 
+                $tanggal = new \DateTime($stok_keluar['tanggal']);
                 $data[] = [
                     'tanggal'      => $tanggal->format('d-m-Y H:i:s'),
-                    'barcode'      => esc($stok_keluar['barcode']),     // Gunakan esc() untuk escaping HTML
-                    'nama_produk'  => esc($stok_keluar['nama_produk']), // Gunakan esc() untuk escaping HTML
-                    'jumlah'       => esc($stok_keluar['jumlah']),
-                    'keterangan'   => esc($stok_keluar['keterangan']), // Gunakan esc() untuk escaping HTML
+                    'barcode'       => esc($stok_keluar['produk_barcode'] ?? 'N/A'),
+                    'nama_produk'   => esc($stok_keluar['nama_produk'] ?? 'Produk Tidak Ditemukan'),
+                    'jumlah'        => number_format((float)($stok_keluar['jumlah'] ?? 0), 0, ',', '.'),
+                    'keterangan'    => esc($stok_keluar['keterangan'] ?? 'Tanpa Keterangan'),
                 ];
             }
         }
         return $this->response->setJSON(['data' => $data]);
     }
-    
-        /**
+
+    /**
      * Membaca data laporan penjualan untuk DataTables berdasarkan rentang tanggal.
      * Mengembalikan data dalam format JSON.
      *
      * @return ResponseInterface
      */
-        public function filter_tanggal(): ResponseInterface
-        {
-            $startDate = $this->request->getGet('start_date');
-            $endDate   = $this->request->getGet('end_date');
+    public function filter_tanggal(): ResponseInterface
+    {
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
 
-            $data = []; // Inisialisasi array data
-        
+        $data = []; // Inisialisasi array data
+
         // Panggil metode readStokKeluar() dari model
         $stokKeluarList = $this->stokKeluarModel->laporanStokKeluar($startDate, $endDate);
 
@@ -116,10 +117,10 @@ class Laporan_stok_keluar extends Controller
                 }
                 $data[] = [
                     'tanggal'      => $formattedTanggal,
-                    'barcode'      => esc($stok_keluar['barcode']),     // Gunakan esc() untuk escaping HTML
-                    'nama_produk'  => esc($stok_keluar['nama_produk']), // Gunakan esc() untuk escaping HTML
-                    'jumlah'       => esc($stok_keluar['jumlah']),
-                    'keterangan'   => esc($stok_keluar['keterangan']), // Gunakan esc() untuk escaping HTML
+                    'barcode'       => esc($stok_keluar['produk_barcode'] ?? 'N/A'),
+                    'nama_produk'   => esc($stok_keluar['nama_produk'] ?? 'Produk Tidak Ditemukan'),
+                    'jumlah'        => number_format((float)($stok_keluar['jumlah'] ?? 0), 0, ',', '.'),
+                    'keterangan'    => esc($stok_keluar['keterangan'] ?? 'Tanpa Keterangan'),
                 ];
             }
         }

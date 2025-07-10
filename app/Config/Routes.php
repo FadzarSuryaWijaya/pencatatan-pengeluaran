@@ -27,8 +27,11 @@ $routes->set404Override();
 
 // We GET a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->GET('/', 'Dashboard::index', ['filter' => 'role: admin, user']);
+$routes->GET('/', 'Dashboard::index', ['filter' => 'role: admin']);
 $routes->POST('dashboard/penjualan_bulan', 'Dashboard::penjualan_bulan');
+
+
+
 
 // Signup routes
 $routes->match(['GET', 'POST'], 'auth/daftar', 'Auth::signup');
@@ -36,6 +39,7 @@ $routes->match(['GET', 'POST'], 'auth/daftar', 'Auth::signup');
 // Auth Controller Routes
 $routes->match(['GET', 'POST'], 'auth/login', 'Auth::login');
 $routes->GET('auth/logout', 'Auth::logout');
+$routes->POST('auth/updateNamaToko', 'Auth::updateNamaToko', ['filter' => 'role: user']);
 
 // Pengaturan Controller Routes
 $routes->GET('pengaturan', 'Pengaturan::index');
@@ -88,7 +92,7 @@ $routes->GET('pengguna/read', 'Pengguna::read');
 $routes->POST('pengguna/add', 'Pengguna::add');
 $routes->POST('pengguna/delete', 'Pengguna::delete');
 $routes->POST('pengguna/edit', 'Pengguna::edit');
-$routes->POST('pengguna/GET_pengguna', 'Pengguna::GET_pengguna');
+$routes->POST('pengguna/get_pengguna', 'Pengguna::get_pengguna');
 $routes->POST('pengguna/search', 'Pengguna::search');
 
 // Produk Controller Routes
@@ -111,7 +115,7 @@ $routes->GET('satuan_produk/read', 'Satuan_produk::read');
 $routes->POST('satuan_produk/add', 'Satuan_produk::add');
 $routes->POST('satuan_produk/delete', 'Satuan_produk::delete');
 $routes->POST('satuan_produk/edit', 'Satuan_produk::edit');
-$routes->POST('satuan_produk/GET_satuan', 'Satuan_produk::GET_satuan');
+$routes->POST('satuan_produk/get_satuan', 'Satuan_produk::get_satuan');
 $routes->POST('satuan_produk/search', 'Satuan_produk::search');
 
 // Supplier Controller Routes
@@ -120,7 +124,7 @@ $routes->GET('supplier/read', 'Supplier::read');
 $routes->POST('supplier/add', 'Supplier::add');
 $routes->POST('supplier/delete', 'Supplier::delete');
 $routes->POST('supplier/edit', 'Supplier::edit');
-$routes->POST('supplier/GET_supplier', 'Supplier::GET_supplier');
+$routes->POST('supplier/get_supplier', 'Supplier::get_supplier');
 $routes->POST('supplier/search', 'Supplier::search');
 
 // Stok_masuk Controller Routes
@@ -128,13 +132,13 @@ $routes->GET('stok_masuk', 'Stok_masuk::index');
 $routes->GET('stok_masuk/read', 'Stok_masuk::read');
 $routes->POST('stok_masuk/read', 'Stok_masuk::read');
 $routes->POST('stok_masuk/add', 'Stok_masuk::add');
-$routes->GET('stok_masuk/laporan', 'Stok_masuk::laporan');
 $routes->POST('stok_masuk/get_barcode', 'Stok_masuk::get_barcode'); // Mengambil detail produk berdasarkan barcode
 $routes->GET('stok_masuk/stok_hari', 'Stok_masuk::stok_hari'); // Mengambil total stok masuk untuk hari ini
 
 // Stok_keluar Controller Routes
 $routes->GET('stok_keluar', 'Stok_keluar::index');
 $routes->GET('stok_keluar/read', 'Stok_keluar::read');
+$routes->POST('stok_keluar/read', 'Stok_keluar::read');
 $routes->POST('stok_keluar/add', 'Stok_keluar::add');
 $routes->POST('stok_keluar/get_barcode', 'Stok_keluar::get_barcode'); // Mengambil detail produk berdasarkan barcode
 $routes->GET('stok_keluar/stok_hari', 'Stok_keluar::stok_hari'); // Mengambil total stok keluar untuk hari ini

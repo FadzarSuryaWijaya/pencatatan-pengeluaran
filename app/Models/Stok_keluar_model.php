@@ -21,7 +21,7 @@ class Stok_keluar_model extends Model
     // Kolom yang diizinkan untuk diisi secara massal (untuk insert/update)
     // PASTIkan ini mencakup semua kolom yang akan Anda gunakan dalam form
     // Asumsi kolom-kolom untuk stok_keluar:
-    protected $allowedFields = ['tanggal', 'jumlah', 'keterangan', 'produk_id']; // Mengganti 'barcode' dengan 'produk_id'
+    protected $allowedFields = ['tanggal', 'jumlah', 'keterangan', 'barcode', 'user_id']; // Mengganti 'barcode' dengan 'produk_id'
                                                                                 // karena itu adalah FK ke produk.id
 
     // Timestamp (atur true jika tabel memiliki kolom created_at, updated_at, deleted_at)
@@ -59,10 +59,22 @@ class Stok_keluar_model extends Model
         // Join 'produk.id = stok_keluar.barcode' di CI3 mengindikasikan 'barcode' di stok_keluar adalah foreign key ke 'produk.id'
         // Saya asumsikan nama kolom di tabel stok_keluar yang menyimpan ID produk adalah 'produk_id'
         return $this->builder()
-                    ->select('stok_keluar.tanggal, stok_keluar.jumlah, stok_keluar.keterangan, produk.barcode, produk.nama_produk')
-                    ->join('produk', 'produk.id = stok_keluar.id') // Sesuaikan 'stok_keluar.produk_id' jika nama kolom berbeda
+                    ->select('stok_keluar.id, stok_keluar.tanggal, stok_keluar.jumlah, stok_keluar.keterangan, produk.barcode as produk_barcode, produk.nama_produk')
+                    ->join('produk', 'produk.id = stok_keluar.barcode', 'left') // Sesuaikan 'stok_keluar.produk_id' jika nama kolom berbeda
+                    ->orderBy('stok_keluar.tanggal', 'DESC')
                     ->get()
                     ->getResultArray(); // Mengambil semua hasil sebagai array of arrays
+    }
+
+    public function readLaporanStokKeluar()
+    {
+        // Menggunakan builder() untuk mengakses Query Builder saat melakukan join
+        return $this->builder()
+                    ->select('stok_keluar.id, stok_keluar.tanggal, stok_keluar.jumlah, stok_keluar.keterangan, produk.barcode as produk_barcode, produk.nama_produk')
+                    ->join('produk', 'produk.id = stok_keluar.barcode', 'left')
+                    ->orderBy('stok_keluar.tanggal', 'DESC')
+                    ->get()
+                    ->getResultArray();
     }
     /**
      * Metode untuk memfilter laporan stok masuk berdasarkan rentang tanggal.
@@ -75,8 +87,8 @@ class Stok_keluar_model extends Model
     public function laporanStokKeluar(?string $startDate, ?string $endDate): array
 {
     $builder = $this->builder()
-                    ->select('stok_keluar.tanggal, stok_keluar.jumlah, stok_keluar.keterangan, produk.barcode, produk.nama_produk')
-                    ->join('produk', 'produk.id = stok_keluar.id', 'left');
+                    ->select('stok_keluar.id, stok_keluar.tanggal, stok_keluar.jumlah, stok_keluar.keterangan, produk.barcode as produk_barcode, produk.nama_produk')
+                    ->join('produk', 'produk.id = stok_keluar.barcode', 'left');
 
     if (!empty($startDate) && !empty($endDate)) {
         $start = (new \DateTime($startDate))->format('Y-m-d 00:00:00');

@@ -3,33 +3,23 @@
 namespace App\Controllers;
 
 use CodeIgniter\Controller;
-use App\Models\Auth_model; // Pastikan Anda mengimpor Auth_model
-use CodeIgniter\HTTP\ResponseInterface; // Opsional, untuk tipe return hint
-use CodeIgniter\HTTP\RedirectResponse; // Opsional, untuk tipe return hint Redirect
+use App\Models\Auth_model;
+use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\RedirectResponse;
 
 class Auth extends Controller
 {
-    /**
-     * An array of helpers to be loaded automatically upon
-     * class instantiation. These helpers will be available
-     * to all methods within the controller.
-     *
-     * @var array
-     */
-    protected $helpers = ['session', 'url']; // 'url' helper untuk fungsi redirect()
+    protected $helpers = ['session', 'url'];
+    protected Auth_model $authModel;
 
-    protected Auth_model $authModel; // Deklarasikan properti untuk model
-
-    /**
-     * Constructor untuk menginisialisasi controller.
-     * Di CI4, gunakan `initController` untuk inisialisasi awal.
-     * Atau, jika Anda hanya perlu memuat model, konstruktor biasa juga bisa.
-     */
     public function __construct()
     {
-        $this->authModel = new Auth_model(); // Inisialisasi Auth_model
+        $this->authModel = new Auth_model();
     }
 
+    /**
+     * Handle user registration
+     */
     public function signup()
     {
         $session = session();
@@ -42,49 +32,79 @@ class Auth extends Controller
 
             // Validasi sederhana
             if ($password !== $password_confirm) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Password dan konfirmasi tidak sama']);
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Password dan konfirmasi tidak sama'
+                ]);
             }
 
             // Cek apakah username sudah ada
             if ($this->authModel->where('username', $username)->first()) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Username sudah digunakan']);
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Username sudah digunakan'
+                ]);
             }
 
             // Hash password
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-            // Simpan data user baru, role default misal 'user' atau 'kasir'
-            $data = [
-                'username' => $username,
-                'nama'     => $nama,
-                'password' => $passwordHash,
-                'role'     => '0' // 0 = user/kasir, 1 = admin (sesuaikan)
-            ];
+            // Start transaction untuk memastikan data consistency
+            $this->authModel->db->transStart();
 
-            $this->authModel->insert($data);
+            try {
+                // Simpan data user baru
+                $userData = [
+                    'username' => $username,
+                    'nama'     => $nama,
+                    'password' => $passwordHash,
+                    'role'     => '0' // Default user
+                ];
 
-            return $this->response->setJSON(['status' => 'success']);
+                $userId = $this->authModel->insert($userData);
+
+                if ($userId) {
+                    // Buat data default untuk user baru
+                    $this->authModel->createDefaultUserData($userId);
+
+                    $this->authModel->db->transComplete();
+
+                    if ($this->authModel->db->transStatus()) {
+                        return $this->response->setJSON([
+                            'status' => 'success',
+                            'message' => 'Registrasi berhasil! Silakan login.'
+                        ]);
+                    } else {
+                        throw new \Exception('Gagal membuat data default');
+                    }
+                } else {
+                    throw new \Exception('Gagal menyimpan data user');
+                }
+            } catch (\Exception $e) {
+                $this->authModel->db->transRollback();
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan saat registrasi: ' . $e->getMessage()
+                ]);
+            }
         } else {
             return view('signup');
         }
     }
 
-
     /**
-     * Menampilkan halaman login atau memproses login.
-     *
-     * @return string|ResponseInterface|RedirectResponse
+     * Handle user login
      */
     public function login()
     {
         $session = session();
 
+        // Cek jika sudah login
         if ($session->get('status') === 'login') {
-            // Redirect sesuai role
             if ($session->get('role') === 'admin') {
                 return redirect()->to('/');
             } else {
-                return redirect()->to('/');
+                return redirect()->to('/transaksi');
             }
         }
 
@@ -96,9 +116,10 @@ class Auth extends Controller
 
             if (!empty($userData)) {
                 if (password_verify($password, $userData['password'])) {
-                    $toko = $this->authModel->getToko();
+                    // Ambil data toko user
+                    $toko = $this->authModel->getToko($userData['id']);
 
-                    $role = ($userData['role'] == '1') ? 'admin' : 'user'; // 'user' untuk kasir
+                    $role = ($userData['role'] == '1') ? 'admin' : 'user';
 
                     $sessionData = [
                         'id'        => $userData['id'],
@@ -111,7 +132,11 @@ class Auth extends Controller
 
                     $session->set($sessionData);
 
-                    return $this->response->setJSON(['status' => 'sukses', 'role' => $role]);
+                    return $this->response->setJSON([
+                        'status' => 'sukses',
+                        'role' => $role,
+                        'redirect' => base_url('/')
+                    ]);
                 } else {
                     return $this->response->setJSON(['status' => 'passwordsalah']);
                 }
@@ -123,17 +148,149 @@ class Auth extends Controller
         }
     }
 
-
     /**
-     * Melakukan logout pengguna.
-     *
-     * @return RedirectResponse
+     * Handle user logout
      */
     public function logout(): RedirectResponse
     {
         $session = session();
-        $session->destroy(); // Hancurkan semua data session
+        $session->destroy();
 
-        return redirect()->to('/'); // Arahkan kembali ke halaman utama atau login
+        return redirect()->to('/auth/login');
+    }
+
+    /**
+     * Get current user profile
+     */
+    // public function profile()
+    // {
+    //     $session = session();
+
+    //     if ($session->get('status') !== 'login') {
+    //         return redirect()->to('/auth/login');
+    //     }
+
+    //     $userId = $session->get('id');
+    //     $user = $this->authModel->find($userId);
+    //     $stats = $this->authModel->getUserStats($userId);
+
+    //     $data = [
+    //         'user' => $user,
+    //         'stats' => $stats,
+    //         'toko' => $session->get('toko')
+    //     ];
+
+    //     return view('profile', $data);
+    // }
+
+    // /**
+    //  * Update user profile
+    //  */
+    // public function updateProfile()
+    // {
+    //     $session = session();
+
+    //     if ($session->get('status') !== 'login') {
+    //         return $this->response->setJSON(['status' => 'error', 'message' => 'Not logged in']);
+    //     }
+
+    //     $userId = $session->get('id');
+    //     $nama = $this->request->getPost('nama');
+    //     $password = $this->request->getPost('password');
+    //     $password_confirm = $this->request->getPost('password_confirm');
+
+    //     $updateData = ['nama' => $nama];
+
+    //     // Jika password diisi, update password
+    //     if (!empty($password)) {
+    //         if ($password !== $password_confirm) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Password dan konfirmasi tidak sama'
+    //             ]);
+    //         }
+    //         $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
+    //     }
+
+    //     if ($this->authModel->update($userId, $updateData)) {
+    //         // Update session nama jika berubah
+    //         $session->set('nama', $nama);
+
+    //         return $this->response->setJSON([
+    //             'status' => 'success',
+    //             'message' => 'Profile berhasil diupdate'
+    //         ]);
+    //     } else {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Gagal update profile'
+    //         ]);
+    //     }
+    // }
+
+    /**
+     * Update nama toko untuk user yang sedang login
+     */
+    public function updateNamaToko()
+    {
+        // Set response header untuk JSON
+        $this->response->setContentType('application/json');
+        
+        $session = session();
+
+        if ($session->get('status') !== 'login') {
+            return $this->response->setJSON([
+                'status' => 'error', 
+                'message' => 'Anda belum login'
+            ]);
+        }
+
+        // Hanya user biasa yang bisa edit nama toko
+        if ($session->get('role') === 'admin') {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Admin tidak dapat mengubah nama toko'
+            ]);
+        }
+
+        $userId = $session->get('id');
+        $namaToko = $this->request->getPost('nama_toko');
+
+        // Validasi input
+        if (empty($namaToko) || trim($namaToko) === '') {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Nama toko harus diisi'
+            ]);
+        }
+
+        // Sanitize input
+        $namaToko = trim($namaToko);
+
+        try {
+            // Update nama toko
+            if ($this->authModel->updateNamaToko($userId, $namaToko)) {
+                // Update session toko
+                $toko = $this->authModel->getToko($userId);
+                $session->set('toko', $toko);
+
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Nama toko berhasil diupdate',
+                    'nama' => $namaToko
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal update nama toko'
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error updating nama toko: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem'
+            ]);
+        }
     }
 }

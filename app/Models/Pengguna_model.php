@@ -53,10 +53,12 @@ class Pengguna_model extends Model
      *
      * @return array|null Array of arrays pengguna atau null jika tidak ada data.
      */
-    public function readPenggunaByRole() // Ubah nama fungsi agar lebih spesifik karena ada kondisi role
+    public function readPenggunaWithTokoByRole()
     {
-        // Menggunakan Query Builder dari model untuk menambahkan kondisi where, kemudian findAll()
-        return $this->where('role', '2')->findAll();
+        return $this->select('pengguna.*, toko.nama as nama_toko, toko.alamat as alamat_toko')
+                    ->join('toko', 'toko.user_id = pengguna.id', 'left') // Use 'left' join to include users without a shop
+                    ->where('pengguna.role', '0') // Assuming you want role '0' for this method
+                    ->findAll();
     }
 
     /**
@@ -90,10 +92,12 @@ class Pengguna_model extends Model
      * @param int $id ID pengguna yang dicari.
      * @return array|object|null Array/object dari pengguna atau null jika tidak ditemukan.
      */
-    public function getPenggunaById($id) // Ubah nama fungsi agar lebih spesifik
+    public function getPenggunaWithTokoById($id)
     {
-        // Menggunakan metode select() dari Query Builder, kemudian find() untuk mendapatkan satu baris
-        return $this->select('id, username, nama')->find($id);
+        return $this->select('pengguna.*, toko.nama as nama_toko, toko.alamat as alamat_toko')
+                    ->join('toko', 'toko.user_id = pengguna.id', 'left') // Use 'left' join
+                    ->where('pengguna.id', $id)
+                    ->first(); // Use first() to get a single row
     }
 
     /**
@@ -105,13 +109,20 @@ class Pengguna_model extends Model
      * @param string $search String pencarian.
      * @return array Array of arrays/objects yang cocok dengan pencarian.
      */
-    public function searchPengguna($search = "") // Ubah nama fungsi agar lebih spesifik
+    public function searchPenggunaWithToko($search = "")
     {
-        // Memanggil metode like() dari Query Builder pada model, kemudian findAll() untuk mendapatkan hasilnya.
-        // Diasumsikan kolom pencarian adalah 'nama' atau 'username' untuk model pengguna.
-        // Jika $search kosong, ini akan mengembalikan semua pengguna.
-        return $this->like('nama', $search)->findAll();
-        // Atau jika ingin mencari di username:
-        // return $this->like('username', $search)->findAll();
+        $builder = $this->select('pengguna.*, toko.nama as nama_toko, toko.alamat as alamat_toko')
+                        ->join('toko', 'toko.user_id = pengguna.id', 'left');
+
+        if (!empty($search)) {
+            $builder->groupStart() // Start a group for OR conditions
+                    ->like('pengguna.nama', $search)
+                    ->orLike('pengguna.username', $search)
+                    ->orLike('toko.nama', $search) // Search by shop name
+                    ->orLike('toko.alamat', $search) // Search by shop address
+                    ->groupEnd(); // End the group
+        }
+
+        return $builder->findAll();
     }
 }

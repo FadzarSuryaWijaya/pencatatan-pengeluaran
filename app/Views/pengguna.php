@@ -36,9 +36,9 @@
     <section class="content">
       <div class="container-fluid">
         <div class="card">
-          <div class="card-header">
+          <!-- <div class="card-header">
             <button class="btn btn-success" data-toggle="modal" data-target="#modal" onclick="add()">Add</button>
-          </div>
+          </div> -->
           <div class="card-body">
             <table class="table w-100 table-bordered table-hover" id="pengguna">
               <thead>
@@ -46,6 +46,8 @@
                   <th>No</th>
                   <th>Username</th>
                   <th>Nama</th>
+                  <th> Nama Toko</th>
+                  <th> Alamat Toko</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -63,12 +65,12 @@
 <div class="modal fade" id="modal">
 <div class="modal-dialog">
 <div class="modal-content">
-  <div class="modal-header">
+  <!-- <div class="modal-header">
     <h5 class="modal-title">Add Data</h5>
     <button class="close" data-dismiss="modal">
       <span>&times;</span>
     </button>
-  </div>
+  </div> -->
   <div class="modal-body">
     <form id="form">
       <input type="hidden" name="id">
