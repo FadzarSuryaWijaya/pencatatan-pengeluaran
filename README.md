@@ -57,12 +57,13 @@ Password : admin1234
 
 ---
 
+
 ## Penjelasan Sistem Pencatatan Pengeluaran Kasir
 
 Aplikasi ini merupakan sistem pencatatan pengeluaran kasir yang dirancang khusus untuk membantu kasir atau pemilik usaha dalam mencatat setiap transaksi pengeluaran secara detail dan terstruktur. Sistem ini memudahkan pengguna dalam mencatat berbagai jenis pengeluaran harian, seperti pembelian barang, pembayaran operasional, dan pengeluaran lainnya yang berkaitan dengan aktivitas kasir.
 
 Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkinkan pengguna untuk memantau, mengelola, serta membuat laporan pengeluaran secara real-time. Fitur laporan dan grafik yang tersedia juga membantu pengguna dalam menganalisis pola pengeluaran, sehingga pengelolaan keuangan usaha menjadi lebih
----
+
 
 ## Fitur Sistem
 
@@ -118,9 +119,15 @@ Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkink
 
 * **Video Demo**:
   [Klik disini!](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
+<br>
 
 * **Poster Digital**:
-  ![alt](pic/POSTER%20WEB%202.png)
+<p align="center" height="100">
+  <img src= "pic/POSTER%20WEB%202.png" />
+</p>
+<br>
 
+* **Poster Digital**:
+[Klik Link Di sini!](https://drive.google.com/file/d/1RWNjs1Jslv2bzdy1cCU0X7bxcBbI6cnK/view?usp=sharing)
 ---
 
