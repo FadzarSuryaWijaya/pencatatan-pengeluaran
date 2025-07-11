@@ -43,7 +43,7 @@ Dosen    : Agung Nugroho, S.Kom., M.KOM
 
 ---
 
-## Demo Aplikasi, Domain, dan Laporan
+## Demo Aplikasi, Domain, dan Laporan⬇️
 
 ```bash
 Pencatatan Pengeluaran kasir (Domain Aplikasi)
@@ -58,14 +58,14 @@ Password : admin1234
 ---
 
 
-## Penjelasan Sistem Pencatatan Pengeluaran Kasir
+## Penjelasan Sistem Pencatatan Pengeluaran Kasir💻
 
 Aplikasi ini merupakan sistem pencatatan pengeluaran kasir yang dirancang khusus untuk membantu kasir atau pemilik usaha dalam mencatat setiap transaksi pengeluaran secara detail dan terstruktur. Sistem ini memudahkan pengguna dalam mencatat berbagai jenis pengeluaran harian, seperti pembelian barang, pembayaran operasional, dan pengeluaran lainnya yang berkaitan dengan aktivitas kasir.
 
 Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkinkan pengguna untuk memantau, mengelola, serta membuat laporan pengeluaran secara real-time. Fitur laporan dan grafik yang tersedia juga membantu pengguna dalam menganalisis pola pengeluaran, sehingga pengelolaan keuangan usaha menjadi lebih
 
 
-## Fitur Sistem
+## Fitur Sistem⚙️
 
 * **Login & Logout** – Sistem autentikasi untuk pengguna dan admin.
 * **Manajemen Pengguna** – Tambah, ubah, dan hapus akun user/admin.
@@ -78,7 +78,7 @@ Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkink
 
 ---
 
-## Desain dan Teknologi
+## Desain dan Teknologi🖼️
 
 * **Frontend**:
 
@@ -104,7 +104,7 @@ Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkink
 
 ---
 
-## Tugas Anggota Kelompok
+## Tugas Anggota Kelompok⚒️
 
 | Nama                    | Tugas                                                               |
 | ----------------------- | ------------------------------------------------------------------- |
@@ -117,17 +117,17 @@ Dengan antarmuka web yang responsif dan mudah digunakan, aplikasi ini memungkink
 
 ## Dokumentasi Proyek
 
-* **Video Demo**:
+* **Video Demo📽️**:
   [Klik disini!](https://youtu.be/ubSJkqdclTk?si=fF6Ff5VtY1vGPPrk)
 <br>
 
-* **Poster Digital**:
-<p align="center" height="100">
-  <img src= "pic/POSTER%20WEB%202.png" />
+* **✨Poster Digital✨**:
+<p align="center">
+  <img src= "pic/POSTER%20WEB%202.png" width="350"/>
 </p>
 <br>
 
-* **Poster Digital**:
+* **Link Laporan Pdf📃**:
 [Klik Link Di sini!](https://drive.google.com/file/d/1RWNjs1Jslv2bzdy1cCU0X7bxcBbI6cnK/view?usp=sharing)
 ---
 
